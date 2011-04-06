@@ -1,0 +1,12 @@
+[submodule "src/automoc"]
+	path = src/automoc
+	url = git://anongit.kde.org/automoc
+[submodule "src/kdewin"]
+	path = src/kdewin
+	url = git://anongit.kde.org/kdewin
+[submodule "src/kdelibs"]
+	path = src/kdelibs
+	url = git://anongit.kde.org/kdelibs
+[submodule "src/kdepimlibs"]
+	path = src/kdepimlibs
+	url = git://anongit.kde.org/kdepimlibs
