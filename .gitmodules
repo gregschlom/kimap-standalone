@@ -10,3 +10,6 @@
 [submodule "src/kdepimlibs"]
 	path = src/kdepimlibs
 	url = git://anongit.kde.org/kdepimlibs
+[submodule "src/ksmtp"]
+	path = src/ksmtp
+	url = git://anongit.kde.org/scratch/schlomoff/ksmtp.git
