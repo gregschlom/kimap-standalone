@@ -1,0 +1,55 @@
+From f08d1cb4a7e946ff28a6bcb8c9c05a2095399972 Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Thu, 10 Feb 2011 15:01:26 +0700
+Subject: [PATCH 2/5] KIMAP::FetchJob: adding the ability to fetch custom headers
+
+---
+ kimap/fetchjob.cpp |    8 +++++++-
+ kimap/fetchjob.h   |   12 ++++++++++++
+ 2 files changed, 19 insertions(+), 1 deletions(-)
+
+diff --git a/kimap/fetchjob.cpp b/kimap/fetchjob.cpp
+index 71b437b..64b0864 100644
+--- a/kimap/fetchjob.cpp
++++ b/kimap/fetchjob.cpp
+@@ -171,7 +171,13 @@ void FetchJob::doStart()
+   switch ( d->scope.mode ) {
+   case FetchScope::Headers:
+     if ( d->scope.parts.isEmpty() ) {
+-      parameters+="(RFC822.SIZE INTERNALDATE BODY.PEEK[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE)] FLAGS UID)";
++      QByteArray customHeaders;
++      if (!d->scope.customHeaders.isEmpty()) {
++        foreach ( const QByteArray &header, d->scope.customHeaders) {
++          customHeaders+=" "+header;
++        }
++      }
++      parameters+="(RFC822.SIZE INTERNALDATE BODY.PEEK[HEADER.FIELDS (TO FROM MESSAGE-ID REFERENCES IN-REPLY-TO SUBJECT DATE" + customHeaders + ")] FLAGS UID)";
+     } else {
+       parameters+='(';
+       foreach ( const QByteArray &part, d->scope.parts ) {
+diff --git a/kimap/fetchjob.h b/kimap/fetchjob.h
+index aa31d2d..8bb5944 100644
+--- a/kimap/fetchjob.h
++++ b/kimap/fetchjob.h
+@@ -148,6 +148,18 @@ class KIMAP_EXPORT FetchJob : public Job
+        * Specify what message data should be fetched.
+        */
+       Mode mode;
++
++      /**
++       * List of additional non-standard headers that have to be fetched in Headers mode.
++       * Example:
++       * @code
++       *  KIMAP::FetchJob::FetchScope scope;
++       *  scope.customHeaders.clear();
++       *  scope.customHeaders << "X-Mailer" << "X-Originating-IP";
++       * @endcode
++       * @since 4.6
++       */
++      QList<QByteArray> customHeaders;
+     };
+ 
+     explicit FetchJob( Session *session );
+-- 
+1.7.4.msysgit.0
+

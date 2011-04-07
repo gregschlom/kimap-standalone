@@ -1,0 +1,197 @@
+From e5b45c720e7584ce3bf0c027f0cb3482b1f06b69 Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Thu, 10 Feb 2011 10:33:52 +0700
+Subject: [PATCH 1/2] patches to compile only kdecore
+
+---
+ CMakeLists.txt                       |   10 ++++++++++
+ cmake/modules/FindKDE4Internal.cmake |    3 ++-
+ kdecore/CMakeLists.txt               |   12 ++++++------
+ kdecore/localization/kcatalog.cpp    |    4 ++++
+ kdecore/tests/CMakeLists.txt         |    2 ++
+ 5 files changed, 24 insertions(+), 7 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 482225b..6cda8f8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -70,6 +70,7 @@ macro_log_feature(PERL_FOUND "Perl" "Needed for building kdelibs" "http://www.pe
+ find_package(ZLIB)
+ macro_log_feature(ZLIB_FOUND "ZLib" "Support for gzip compressed files and data streams" "http://www.zlib.net" TRUE "" "Required by the core KDE libraries and some critical kioslaves")
+ 
++if (NOT KIMAP_STANDALONE)
+ set(STRIGI_MIN_VERSION 0.6.3)
+ find_package(Strigi)
+ if (WIN32)
+@@ -84,6 +85,7 @@ macro_log_feature(STRIGI_FOUND "Strigi" "Desktop indexing and search support" "h
+ set(LIBATTICA_MIN_VERSION "0.1.90")
+ find_package(LibAttica)
+ macro_log_feature(LIBATTICA_FOUND "libattica" "Support for Get Hot New Stuff" "git clone git://git.kde.org/attica" TRUE "${LIBATTICA_MIN_VERSION}" "")
++endif (NOT KIMAP_STANDALONE)
+ 
+ #optional features
+ if(X11_FOUND)
+@@ -124,8 +126,10 @@ macro_log_feature(SHAREDDESKTOPONTOLOGIES_FOUND "Shared desktop ontologies" "Sup
+ macro_optional_find_package(QCA2)
+ macro_log_feature(QCA2_FOUND "QCA2" "Support for remote plasma widgets" "http://delta.affinix.com/qca" FALSE "2.0.0" "")
+ 
++if (NOT KIMAP_STANDALONE)
+ find_package(DBusMenuQt)
+ macro_log_feature(DBUSMENUQT_FOUND "DBusMenuQt" "Support for notification area menus via the DBusMenu protocol" "git clone git://gitorious.org/dbusmenu/dbusmenu-qt.git" TRUE "" "")
++endif (NOT KIMAP_STANDALONE)
+ 
+ ################# Disallow in-source build #################
+ 
+@@ -282,6 +286,7 @@ check_library_exists(socket connect "" HAVE_SOCKET_LIBRARY)
+ 
+ add_subdirectory( cmake )
+ add_subdirectory( kdecore )
++if (NOT KIMAP_STANDALONE)
+ add_subdirectory( kdeui )
+ if (UNIX)
+    add_subdirectory( kpty )
+@@ -330,9 +335,12 @@ add_subdirectory( plasma )
+ endif(NOT WINCE)
+ add_subdirectory( kunitconversion )
+ add_subdirectory( kdewebkit )
++endif (NOT KIMAP_STANDALONE)
+ add_subdirectory( includes )
+ 
++if (NOT KIMAP_STANDALONE)
+ macro_optional_add_subdirectory( doc  )
++endif (NOT KIMAP_STANDALONE)
+ 
+ ################# write dependency file which will be installed #################
+ 
+@@ -362,6 +370,8 @@ install( EXPORT kdelibsToolsTargets   DESTINATION ${DATA_INSTALL_DIR}/cmake/modu
+ # the following will be the correct locations once cmake has the improved FIND_PACKAGE()
+ # install( FILES ${CMAKE_CURRENT_BINARY_DIR}/KDELibsDependencies.cmake DESTINATION ${PLUGIN_INSTALL_DIR}/cmake RENAME KDE4Config.cmake)
+ 
++if (NOT KIMAP_STANDALONE)
+ macro_optional_add_subdirectory( experimental )
++endif (NOT KIMAP_STANDALONE)
+ 
+ macro_display_feature_log()
+diff --git a/cmake/modules/FindKDE4Internal.cmake b/cmake/modules/FindKDE4Internal.cmake
+index cf221a5..bb1cab3 100644
+--- a/cmake/modules/FindKDE4Internal.cmake
++++ b/cmake/modules/FindKDE4Internal.cmake
+@@ -702,6 +702,7 @@ endif(_kdeBootStrapping  OR  TARGET ${KDE4_TARGET_PREFIX}nepomuk)
+ # which helps with finding the phonon installed as part of kdesupport:
+ 
+ # only make Phonon REQUIRED if KDE4 itself is REQUIRED
++if (NOT KIMAP_STANDALONE)
+ find_package(Phonon 4.3.80 ${_REQ_STRING_KDE4})
+ set(KDE4_PHONON_LIBRARY ${PHONON_LIBRARY})
+ set(KDE4_PHONON_LIBS ${PHONON_LIBS})
+@@ -711,7 +712,7 @@ if(NOT PHONON_FOUND)
+    message(STATUS "KDE4 not found, because Phonon was not found")
+    return()
+ endif(NOT PHONON_FOUND)
+-
++endif (NOT KIMAP_STANDALONE)
+ 
+ #####################  provide some options   ##########################################
+ 
+diff --git a/kdecore/CMakeLists.txt b/kdecore/CMakeLists.txt
+index f78c115..57945a8 100644
+--- a/kdecore/CMakeLists.txt
++++ b/kdecore/CMakeLists.txt
+@@ -147,9 +147,9 @@ endif (UNIX)
+ add_subdirectory( kconfig_compiler )
+ add_subdirectory( tests )
+ add_subdirectory( sonnet/tests )
+-if ( NOT WINCE )
++if ( NOT WINCE AND NOT KIMAP_STANDALONE)
+     add_subdirectory( network/kssld )
+-endif ( NOT WINCE )
++endif ( NOT WINCE AND NOT KIMAP_STANDALONE )
+ 
+ ########### next target ###############
+ 
+@@ -434,7 +434,7 @@ if (NOT "${KDE4_AUTH_BACKEND_NAME}" STREQUAL "FAKE")
+     install( TARGETS kauth-policy-gen EXPORT kdelibsToolsTargets DESTINATION ${LIBEXEC_INSTALL_DIR})
+ endif (NOT "${KDE4_AUTH_BACKEND_NAME}" STREQUAL "FAKE")
+ 
+-if ( NOT WINCE )
++if ( NOT WINCE AND NOT KIMAP_STANDALONE )
+     ########### next target ###############
+ 
+     # KAuth backend plugin
+@@ -463,7 +463,7 @@ if ( NOT WINCE )
+                 RUNTIME DESTINATION ${KAUTH_HELPER_PLUGIN_DIR}
+         )
+     endif (NOT "${KDE4_AUTH_HELPER_BACKEND_NAME}" STREQUAL "FAKE")
+-endif ( NOT WINCE )
++endif ( NOT WINCE AND NOT KIMAP_STANDALONE )
+ 
+ ########### next target ###############
+ 
+@@ -478,7 +478,7 @@ install(TARGETS kde4-config ${INSTALL_TARGETS_DEFAULT_ARGS} )
+ 
+ ########### next target ###############
+ 
+-if(NOT WINCE)
++if(NOT WINCE AND NOT KIMAP_STANDALONE)
+     # kjs hash stuff for transcript plugin
+     set( CREATE_HASH_TABLE ${CMAKE_SOURCE_DIR}/kjs/create_hash_table )
+ 
+@@ -509,7 +509,7 @@ if(NOT WINCE)
+ 
+     install( TARGETS ktranscript DESTINATION ${PLUGIN_INSTALL_DIR} )
+ 
+-endif(NOT WINCE)
++endif(NOT WINCE AND NOT KIMAP_STANDALONE )
+ 
+ ########### install files ###############
+ install( FILES ${CMAKE_CURRENT_BINARY_DIR}/all_languages DESTINATION ${LOCALE_INSTALL_DIR}  )
+diff --git a/kdecore/localization/kcatalog.cpp b/kdecore/localization/kcatalog.cpp
+index 1f01688..1fd3024 100644
+--- a/kdecore/localization/kcatalog.cpp
++++ b/kdecore/localization/kcatalog.cpp
+@@ -169,9 +169,11 @@ QString KCatalog::localeDir() const
+   return QFile::decodeName(d->localeDir);
+ }
+ 
++#ifndef KIMAP_STANDALONE
+ #ifdef Q_WS_WIN
+   extern "C" int __declspec(dllimport) _nl_msg_cat_cntr;
+ #endif
++#endif
+ 
+ void KCatalogPrivate::setupGettextEnv ()
+ {
+@@ -195,10 +197,12 @@ void KCatalogPrivate::setupGettextEnv ()
+ 
+     // Magic to make sure Gettext doesn't use stale cached translation
+     // from previous language.
++#ifndef KIMAP_STANDALONE
+ #ifndef _MSC_VER
+     extern int _nl_msg_cat_cntr;
+ #endif
+     ++_nl_msg_cat_cntr;
++#endif
+   }
+ }
+ 
+diff --git a/kdecore/tests/CMakeLists.txt b/kdecore/tests/CMakeLists.txt
+index 9703c7d..0ed5d98 100644
+--- a/kdecore/tests/CMakeLists.txt
++++ b/kdecore/tests/CMakeLists.txt
+@@ -139,11 +139,13 @@ target_link_libraries(kmimeglobsfileparsertest ${KDE4_KDECORE_LIBS} ${QT_QTTEST_
+ 
+ # compile httpfilter.cpp into the test since it's not part of kdelibs
+ # (only par of kio_http and kmultipart)
++if (NOT KIMAP_STANDALONE)
+ set(kfiltertest_SRCS kfiltertest.cpp ../../kio/httpfilter/httpfilter.cc)
+ include_directories( ${CMAKE_SOURCE_DIR}/kio/httpfilter )
+ kde4_add_unit_test(kfiltertest TESTNAME kdecore-kfiltertest ${kfiltertest_SRCS})
+ target_link_libraries(kfiltertest ${KDE4_KDECORE_LIBS} ${QT_QTTEST_LIBRARY} )
+ target_link_libraries(kfiltertest ${ZLIB_LIBRARIES})
++endif (NOT KIMAP_STANDALONE)
+ 
+ ########### module for klibloadertest ###############
+ 
+-- 
+1.7.4.msysgit.0
+

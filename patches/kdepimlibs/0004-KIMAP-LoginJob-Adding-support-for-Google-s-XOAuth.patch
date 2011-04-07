@@ -1,0 +1,131 @@
+From 881521bb895ada88569ec68cc3a93befb24cde96 Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Mon, 7 Mar 2011 23:27:39 +0700
+Subject: [PATCH 4/5] KIMAP::LoginJob: Adding support for Google's XOAuth
+
+---
+ kimap/loginjob.cpp |   78 ++++++++++++++++++++++++++++-----------------------
+ kimap/loginjob.h   |    3 +-
+ 2 files changed, 45 insertions(+), 36 deletions(-)
+
+diff --git a/kimap/loginjob.cpp b/kimap/loginjob.cpp
+index 0f13ef4..139f873 100644
+--- a/kimap/loginjob.cpp
++++ b/kimap/loginjob.cpp
+@@ -348,49 +348,55 @@ void LoginJob::handleResponse( const Message &response )
+ 
+ bool LoginJobPrivate::startAuthentication()
+ {
+-  //SASL authentication
+-  if (!initSASL()) {
+-    q->setError( LoginJob::UserDefinedError );
+-    q->setErrorText( i18n("Login failed, client cannot initialize the SASL library.") );
+-    return false;
+-  }
++  QByteArray challenge;
+ 
+-  authState = LoginJobPrivate::Authenticate;
+-  const char *out = 0;
+-  uint outlen = 0;
+-  const char *mechusing = 0;
++  if (authMode == "XOAUTH") {
++    challenge = password.toLatin1();
+ 
+-  int result = sasl_client_new( "imap", m_session->hostName().toLatin1(), 0, 0, callbacks, 0, &conn );
+-  if ( result != SASL_OK ) {
+-    kDebug() <<"sasl_client_new failed with:" << result;
+-    q->setError( LoginJob::UserDefinedError );
+-    q->setErrorText( QString::fromUtf8( sasl_errdetail( conn ) ) );
+-    return false;
+-  }
++  } else {
++    //SASL authentication
++    if (!initSASL()) {
++      q->setError( LoginJob::UserDefinedError );
++      q->setErrorText( i18n("Login failed, client cannot initialize the SASL library.") );
++      return false;
++    }
+ 
+-  do {
+-    result = sasl_client_start(conn, authMode.toLatin1(), &client_interact, capabilities.contains("SASL-IR") ? &out : 0, &outlen, &mechusing);
++    authState = LoginJobPrivate::Authenticate;
++    const char *out = 0;
++    uint outlen = 0;
++    const char *mechusing = 0;
++
++    int result = sasl_client_new( "imap", m_session->hostName().toLatin1(), 0, 0, callbacks, 0, &conn );
++    if ( result != SASL_OK ) {
++      kDebug() <<"sasl_client_new failed with:" << result;
++      q->setError( LoginJob::UserDefinedError );
++      q->setErrorText( QString::fromUtf8( sasl_errdetail( conn ) ) );
++      return false;
++    }
+ 
+-    if ( result == SASL_INTERACT ) {
+-      if ( !sasl_interact() ) {
+-        sasl_dispose( &conn );
+-        q->setError( LoginJob::UserDefinedError ); //TODO: check up the actual error
+-        return false;
++    do {
++      result = sasl_client_start(conn, authMode.toLatin1(), &client_interact, capabilities.contains("SASL-IR") ? &out : 0, &outlen, &mechusing);
++
++      if ( result == SASL_INTERACT ) {
++        if ( !sasl_interact() ) {
++          sasl_dispose( &conn );
++          q->setError( LoginJob::UserDefinedError ); //TODO: check up the actual error
++          return false;
++        }
+       }
++    } while ( result == SASL_INTERACT );
++
++    if ( result != SASL_CONTINUE && result != SASL_OK ) {
++      kDebug() <<"sasl_client_start failed with:" << result;
++      q->setError( LoginJob::UserDefinedError );
++      q->setErrorText( QString::fromUtf8( sasl_errdetail( conn ) ) );
++      sasl_dispose( &conn );
++      return false;
+     }
+-  } while ( result == SASL_INTERACT );
+ 
+-  if ( result != SASL_CONTINUE && result != SASL_OK ) {
+-    kDebug() <<"sasl_client_start failed with:" << result;
+-    q->setError( LoginJob::UserDefinedError );
+-    q->setErrorText( QString::fromUtf8( sasl_errdetail( conn ) ) );
+-    sasl_dispose( &conn );
+-    return false;
++    QByteArray tmp = QByteArray::fromRawData( out, outlen );
++    challenge = tmp.toBase64();
+   }
+-
+-  QByteArray tmp = QByteArray::fromRawData( out, outlen );
+-  QByteArray challenge = tmp.toBase64();
+-
+   if ( challenge.isEmpty() ) {
+     tags << sessionInternal()->sendCommand( "AUTHENTICATE", authMode.toLatin1() );
+   } else {
+@@ -481,6 +487,8 @@ void LoginJob::setAuthenticationMode(AuthenticationMode mode)
+       break;
+     case Anonymous: d->authMode = "ANONYMOUS";
+       break;
++    case XOAuth: d->authMode = "XOAUTH";
++      break;
+     default:
+       d->authMode = "";
+   }
+diff --git a/kimap/loginjob.h b/kimap/loginjob.h
+index 157f5bc..cd45194 100644
+--- a/kimap/loginjob.h
++++ b/kimap/loginjob.h
+@@ -56,7 +56,8 @@ class KIMAP_EXPORT LoginJob : public Job
+         DigestMD5,
+         NTLM,
+         GSSAPI,
+-        Anonymous
++        Anonymous,
++        XOAuth
+     };
+ 
+     explicit LoginJob( Session *session );
+-- 
+1.7.4.msysgit.0
+

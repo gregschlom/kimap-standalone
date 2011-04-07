@@ -1,0 +1,119 @@
+From b957758c49deab62196302b816e3bd92b2e69faa Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Thu, 10 Feb 2011 10:34:28 +0700
+Subject: [PATCH 1/5] patches to compile only kmime and kimap
+
+---
+ CMakeLists.txt                  |   22 ++++++++++++++++++----
+ kmime/tests/auto/CMakeLists.txt |    6 +++++-
+ 2 files changed, 23 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 362fc49..790a72f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,9 +14,9 @@ set(KDEPIMLIBS_VERSION ${KDEPIMLIBS_VERSION_MAJOR}.${KDEPIMLIBS_VERSION_MINOR}.$
+ ############### search packages used by KDE ###############
+ 
+ # cmake would not find kde for xcompile if that is not set 
+-if(WINCE)
++if(WINCE OR KIMAP_STANDALONE)
+     set(KDE4_DATA_DIR "${CMAKE_PREFIX_PATH}/share/apps")
+-endif(WINCE)
++endif(WINCE OR KIMAP_STANDALONE)
+ 
+ set (QT_MIN_VERSION "4.6.0")
+ # kdepim depends on the latest released version of KDE 4.4
+@@ -71,23 +71,28 @@ macro_log_feature(Boost_FOUND "Boost C++ Libraries" "Required by core components
+ 
+ 
+ 
++if (NOT KIMAP_STANDALONE)
+ #FindGpgme.cmake already handles the log message but we must ensure it is required.
+ find_package(Gpgme REQUIRED)
+ # configure macros
+ if (GPGME_FOUND)
+   include (gpgme++/ConfigureChecks.cmake)
+ endif (GPGME_FOUND)
++endif (NOT KIMAP_STANDALONE)
+ 
+ if (NOT KDEPIM_ONLY_KLEO)
++  if (NOT KIMAP_STANDALONE)
+   #FindAkonadi.cmake is only there for compatibility reasons, but we don't want to use that.
+   set(Akonadi_MIN_VERSION "1.5.51")
+   find_package(Akonadi ${Akonadi_MIN_VERSION} QUIET NO_MODULE)
+   macro_log_feature(Akonadi_FOUND "Akonadi server libraries" "Access to PIM storage and services" "http://pim.kde.org/akonadi" TRUE "${Akonadi_MIN_VERSION}" "")
++  endif (NOT KIMAP_STANDALONE)
+ 
+   find_package(Sasl2)
+   macro_log_feature(SASL2_FOUND "cyrus-sasl" "Login authentication for IMAP and Sieve" "http://asg.web.cmu.edu/sasl/sasl-library.html" TRUE "" "")
+   include (ConfigureChecks.cmake)
+ 
++  if (NOT KIMAP_STANDALONE)
+   set(SHARED_MIME_INFO_MINIMUM_VERSION "0.30")
+   find_package(SharedMimeInfo)
+   macro_log_feature(SHARED_MIME_INFO_FOUND "shared-mime-info" "Information about filetypes" "http://freedesktop.org/wiki/Software/shared-mime-info" TRUE "0.30" "")
+@@ -118,7 +123,7 @@ if (NOT KDEPIM_ONLY_KLEO)
+   set(LIBICAL_MIN_VERSION "0.42")
+   find_package(Libical)
+   macro_log_feature(LIBICAL_FOUND "libical" "Calendar support" "http://sourceforge.net/projects/freeassociation" TRUE "${LIBICAL_MIN_VERSION}" "Needed by the kcal and kcalcore libraries")
+-
++  endif (NOT KIMAP_STANDALONE)
+ endif (NOT KDEPIM_ONLY_KLEO)
+ 
+ ############### Needed commands before building anything ###############
+@@ -159,6 +164,12 @@ endif(STATIC_LIBRARY)
+ ############### Now, we add the KDEPIMLibs components ###############
+ # These targets will always be built
+ add_subdirectory(cmake)
++
++add_subdirectory(kmime)
++add_subdirectory(kimap)
++
++if (NOT KIMAP_STANDALONE)
++
+ add_subdirectory(gpgme++)
+ add_subdirectory(qgpgme)
+ 
+@@ -203,17 +214,20 @@ endif (NOT KDEPIM_ONLY_KLEO)
+ # doc must be a subdir of kdepimlibs
+ macro_optional_add_subdirectory(doc)
+ 
++endif (NOT KIMAP_STANDALONE)
++
+ # All done, let's display what we found...
+ macro_display_feature_log()
+ 
+ 
+ ############### Here we install some extra stuff  ###############
+ 
++if (NOT KIMAP_STANDALONE)
+ if (NOT KDEPIM_ONLY_KLEO)
+   install(FILES kdepimlibs-mime.xml DESTINATION ${XDG_MIME_INSTALL_DIR})
+   update_xdg_mimetypes(${XDG_MIME_INSTALL_DIR})
+ endif (NOT KDEPIM_ONLY_KLEO)
+-
++endif (NOT KIMAP_STANDALONE)
+ 
+ # now create the KdepimLibsConfig.cmake file, which will be loaded by
+ # kdelibs/cmake/modules/FindKdepimLibs.cmake and which has to contain all information
+diff --git a/kmime/tests/auto/CMakeLists.txt b/kmime/tests/auto/CMakeLists.txt
+index f5ae49f..a16fc48 100644
+--- a/kmime/tests/auto/CMakeLists.txt
++++ b/kmime/tests/auto/CMakeLists.txt
+@@ -6,7 +6,11 @@ macro(add_kmime_test _source)
+   set(_test ${_source})
+   get_filename_component(_name ${_source} NAME_WE)
+   kde4_add_unit_test(${_name} TESTNAME kmime-${_name} ${_test})
+-  target_link_libraries(${_name} kmime ${QT_QTTEST_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY} ${KDE4_KDEUI_LIBS} )
++  if(KIMAP_STANDALONE)
++    target_link_libraries(${_name} kmime ${QT_QTTEST_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY} )
++  else(KIMAP_STANDALONE)
++    target_link_libraries(${_name} kmime ${QT_QTTEST_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY} ${KDE4_KDEUI_LIBS} )
++  endif(KIMAP_STANDALONE)
+ endmacro(add_kmime_test)
+ 
+ add_kmime_test(rfc2047test.cpp)
+-- 
+1.7.4.msysgit.0
+

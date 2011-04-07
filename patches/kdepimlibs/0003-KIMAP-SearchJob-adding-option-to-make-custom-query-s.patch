@@ -1,0 +1,129 @@
+From 8f46ce16aa56cd766b136d13733ec16b8e52888a Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Thu, 10 Feb 2011 17:52:18 +0700
+Subject: [PATCH 3/5] KIMAP::SearchJob: adding option to make custom-query searches
+
+Conflicts:
+
+	kimap/searchjob.cpp
+---
+ kimap/searchjob.cpp |   63 ++++++++++++++++++++++++++++++---------------------
+ kimap/searchjob.h   |    2 +
+ 2 files changed, 39 insertions(+), 26 deletions(-)
+
+diff --git a/kimap/searchjob.cpp b/kimap/searchjob.cpp
+index 1a5e722..0eb115f 100644
+--- a/kimap/searchjob.cpp
++++ b/kimap/searchjob.cpp
+@@ -35,7 +35,7 @@ namespace KIMAP
+   class SearchJobPrivate : public JobPrivate
+   {
+     public:
+-      SearchJobPrivate( Session *session, const QString& name ) : JobPrivate(session, name), logic(SearchJob::And) {
++      SearchJobPrivate( Session *session, const QString& name ) : JobPrivate(session, name), logic(SearchJob::And), query("") {
+         criteriaMap[SearchJob::All]  = "ALL";
+         criteriaMap[SearchJob::Answered] = "ANSWERED";
+         criteriaMap[SearchJob::BCC] = "BCC";
+@@ -99,6 +99,7 @@ namespace KIMAP
+       QList<qint64> results;
+       uint nextContent;
+       bool uidBased;
++      QString query;
+   };
+ }
+ 
+@@ -117,38 +118,42 @@ void SearchJob::doStart()
+ {
+   Q_D(SearchJob);
+ 
+-  QByteArray searchKey;
+-
+-  if (!d->charset.isEmpty()) {
+-    searchKey = "CHARSET " + d->charset;
++  QByteArray command = "SEARCH";
++  if ( d->uidBased ) {
++    command = "UID " + command;
+   }
+ 
+-  if (d->logic == SearchJob::Not) {
+-    searchKey += "NOT";
+-  } else if (d->logic == SearchJob::Or) {
+-    searchKey += "OR";
+-  }
++  if (!d->query.isEmpty()) {
++    d->tags << d->sessionInternal()->sendCommand( command, d->query.toUtf8() );
++  } else {
++    QByteArray searchKey;
+ 
+-  if ( d->logic == SearchJob::And ) {
+-    for ( int i = 0; i<d->criterias.size(); i++ ) {
+-      const QByteArray key = d->criterias.at( i );
+-      if ( i>0 ) searchKey+= ' ';
+-      searchKey += key;
++    if (!d->charset.isEmpty()) {
++    searchKey = "CHARSET " + d->charset;
+     }
+-  } else {
+-    for ( int i = 0; i<d->criterias.size(); i++ ) {
+-      const QByteArray key = d->criterias.at( i );
+-      if ( i>0 ) searchKey+= ' ';
+-      searchKey += '(' + key + ')';
++
++    if (d->logic == SearchJob::Not) {
++      searchKey += "NOT";
++    } else if (d->logic == SearchJob::Or) {
++      searchKey += "OR";
+     }
+-  }
+ 
+-  QByteArray command = "SEARCH";
+-  if ( d->uidBased ) {
+-    command = "UID "+ command;
++    if ( d->logic == SearchJob::And ) {
++      for ( int i = 0; i<d->criterias.size(); i++ ) {
++        const QByteArray key = d->criterias.at( i );
++        if ( i>0 ) searchKey+= ' ';
++        searchKey += key;
++      }
++    } else {
++      for ( int i = 0; i<d->criterias.size(); i++ ) {
++        const QByteArray key = d->criterias.at( i );
++        if ( i>0 ) searchKey+= ' ';
++        searchKey += '(' + key + ')';
++      }
++    }
++	
++    d->tags << d->sessionInternal()->sendCommand( command, searchKey );
+   }
+-
+-  d->tags << d->sessionInternal()->sendCommand( command, searchKey );
+ }
+ 
+ void SearchJob::handleResponse( const Message &response )
+@@ -314,4 +319,10 @@ QList<int> SearchJob::foundItems()
+   return results;
+ }
+ 
++void SearchJob::setQuery(const QString query)
++{
++  Q_D(SearchJob);
++  d->query = query;
++}
++
+ #include "searchjob.moc"
+diff --git a/kimap/searchjob.h b/kimap/searchjob.h
+index 077e8d4..b0003ba 100644
+--- a/kimap/searchjob.h
++++ b/kimap/searchjob.h
+@@ -91,6 +91,8 @@ class KIMAP_EXPORT SearchJob : public Job
+     void setCharset( const QByteArray &charSet );
+     QByteArray charset() const;
+ 
++    void setQuery( const QString query );
++
+     /**
+      * Get the search result, as a list of sequence numbers or UIDs, based on the isUidBased status
+      * @return the found items
+-- 
+1.7.4.msysgit.0
+

@@ -1,0 +1,433 @@
+From ecc2d60ded488e5912cced4ecd8d1607977e7944 Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Sat, 26 Mar 2011 11:18:09 +0700
+Subject: [PATCH 2/2] Adding CMake and C++ flag NO_DBUS to compile kdecore without dbus
+
+---
+ kdecore/CMakeLists.txt                     |   28 +++++++++++++++++++++++-----
+ kdecore/config/kconfig.cpp                 |    2 ++
+ kdecore/date/ksystemtimezone.cpp           |    5 ++++-
+ kdecore/io/kdebugdbusiface.cpp             |    2 ++
+ kdecore/network/ksslcertificatemanager.cpp |   26 +++++++++++++++++++++++++-
+ kdecore/network/ksslcertificatemanager_p.h |    4 ++++
+ kdecore/services/kmimetype.cpp             |    4 ++++
+ kdecore/sycoca/ksycoca.cpp                 |    5 ++++-
+ kdecore/tests/CMakeLists.txt               |    9 +++++++--
+ kdecore/tests/kdatetimetest.cpp            |    4 ++++
+ kdecore/tests/klocaletest.cpp              |    4 ++++
+ kdecore/tests/ktimezonestest.cpp           |    4 ++++
+ 12 files changed, 87 insertions(+), 10 deletions(-)
+
+diff --git a/kdecore/CMakeLists.txt b/kdecore/CMakeLists.txt
+index 57945a8..a0a31a4 100644
+--- a/kdecore/CMakeLists.txt
++++ b/kdecore/CMakeLists.txt
+@@ -95,7 +95,6 @@ endif (APPLE)
+ if (WIN32)
+    LIST(APPEND kdecore_OPTIONAL_SRCS
+       kernel/kkernel_win.cpp
+-      kernel/ktoolinvocation_win.cpp
+       kernel/kstandarddirs_win.cpp
+       localization/klocale_win.cpp
+       network/klocalsocket_win.cpp
+@@ -105,6 +104,11 @@ if (WIN32)
+       util/kshell_win.cpp
+       date/ktimezone_win.cpp
+    )
++   if(NOT NO_DBUS)
++     LIST(APPEND kdecore_OPTIONAL_SRCS
++       kernel/ktoolinvocation_win.cpp
++     )
++   endif(NOT NO_DBUS)
+    if(NOT WINCE)
+        LIST(APPEND kdecore_OPTIONAL_SRCS
+           util/kuser_win.cpp
+@@ -124,7 +128,6 @@ endif (WIN32)
+ 
+ if (UNIX)
+    set(kdecore_OPTIONAL_SRCS ${kdecore_OPTIONAL_SRCS}
+-      kernel/ktoolinvocation_x11.cpp
+       kernel/kstandarddirs_unix.cpp
+       localization/klocale_unix.cpp
+       network/klocalsocket_unix.cpp
+@@ -135,6 +138,11 @@ if (UNIX)
+       util/kmacroexpander_unix.cpp
+       fakes.c
+    )
++   if(NOT NO_DBUS)
++     LIST(APPEND kdecore_OPTIONAL_SRCS
++       kernel/ktoolinvocation_x11.cpp
++     )
++   endif(NOT NO_DBUS)
+    if (NOT KDECORE_NO_KDE3SUPPORT)
+       set(kdecore_OPTIONAL_SRCS ${kdecore_OPTIONAL_SRCS}
+          network/k3httpproxysocketdevice.cpp
+@@ -228,7 +236,6 @@ set(kdecore_LIB_SRCS
+    kernel/kglobal.cpp
+    kernel/kcomponentdata.cpp
+    kernel/kstandarddirs.cpp
+-   kernel/ktoolinvocation.cpp
+    auth/kauthaction.cpp
+    auth/kauthactionreply.cpp
+    auth/kauthactionwatcher.cpp
+@@ -271,6 +278,12 @@ set(kdecore_LIB_SRCS
+    sonnet/globals.cpp
+ )
+ 
++if(NOT NO_DBUS)
++  set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
++    kernel/ktoolinvocation.cpp
++  )
++endif(NOT NO_DBUS)
++
+ if (NOT KDECORE_NO_KDE3SUPPORT)
+    set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
+       network/k3socketdevice.cpp # must be before the rest of network/, for enable-final
+@@ -346,9 +359,7 @@ set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
+    text/kstringhandler.cpp
+    util/kallocator.cpp
+    util/kautostart.cpp
+-   util/kdedmodule.cpp
+    util/kdeversion.cpp
+-   util/klauncher_iface.cpp
+    util/klibrary.cpp
+    util/kmacroexpander.cpp
+    util/kpluginfactory.cpp
+@@ -360,6 +371,13 @@ set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
+    ${kdecore_OPTIONAL_SRCS}
+ )
+ 
++if(NOT NO_DBUS)
++    set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
++        util/kdedmodule.cpp
++        util/klauncher_iface.cpp
++    )
++endif(NOT NO_DBUS)
++
+ if(NOT KDE_NO_DEPRECATED)
+     set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
+        util/klibloader.cpp
+diff --git a/kdecore/config/kconfig.cpp b/kdecore/config/kconfig.cpp
+index 35eb7a3..412763a 100644
+--- a/kdecore/config/kconfig.cpp
++++ b/kdecore/config/kconfig.cpp
+@@ -401,6 +401,7 @@ void KConfig::markAsClean()
+ 
+ void KConfig::checkUpdate(const QString &id, const QString &updateFile)
+ {
++#ifndef NO_DBUS
+     const KConfigGroup cg(this, "$Version");
+     const QString cfg_id = updateFile+QLatin1Char(':')+id;
+     const QStringList ids = cg.readEntry("update_info", QStringList());
+@@ -408,6 +409,7 @@ void KConfig::checkUpdate(const QString &id, const QString &updateFile)
+         KToolInvocation::kdeinitExecWait(QString::fromLatin1("kconf_update"), QStringList() << QString::fromLatin1("--check") << updateFile);
+         reparseConfiguration();
+     }
++#endif
+ }
+ 
+ KConfig* KConfig::copyTo(const QString &file, KConfig *config) const
+diff --git a/kdecore/date/ksystemtimezone.cpp b/kdecore/date/ksystemtimezone.cpp
+index 446ce4e..974cd7e 100644
+--- a/kdecore/date/ksystemtimezone.cpp
++++ b/kdecore/date/ksystemtimezone.cpp
+@@ -179,12 +179,14 @@ K_GLOBAL_STATIC(KTimeZone, simulatedLocalZone)
+ KSystemTimeZones::KSystemTimeZones()
+   : d(0)
+ {
++#ifndef NO_DBUS
+     QDBusConnection dbus = QDBusConnection::sessionBus();
+     const QString dbusIface = QString::fromLatin1(KTIMEZONED_DBUS_IFACE);
+     dbus.connect(QString(), QString(), dbusIface, QLatin1String("configChanged"), this, SLOT(configChanged()));
+     dbus.connect(QString(), QString(), dbusIface, QLatin1String("zonetabChanged"), this, SLOT(zonetabChanged(QString)));
+     // No need to connect to definitionChanged() - see comments in zoneDefinitionChanged()
+     //dbus.connect(QString(), QString(), dbusIface, QLatin1String("definitionChanged"), this, SLOT(zoneDefinitionChanged(QString)));
++#endif
+ }
+ 
+ KSystemTimeZones::~KSystemTimeZones()
+@@ -297,6 +299,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
+         // A KSystemTimeZones instance is required only to catch D-Bus signals.
+         m_parent = new KSystemTimeZones;
+         // Ensure that the KDED time zones module has initialized. The call loads the module on demand.
++#ifndef NO_DBUS
+         if (!QDBusConnection::sessionBus().interface()->isServiceRegistered(QLatin1String("org.kde.kded")))
+             KToolInvocation::klauncher();   // this calls startKdeinit, and blocks until it returns
+         const QString dbusIface = QString::fromLatin1(KTIMEZONED_DBUS_IFACE);
+@@ -307,7 +310,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
+             kError(161) << "KSystemTimeZones: ktimezoned initialize() D-Bus call failed: " << reply.error().message() << endl;
+ kDebug(161)<<"instance(): ... initialised";
+         delete ktimezoned;
+-
++#endif
+         // Read the time zone config written by ktimezoned
+         readConfig(true);
+ 
+diff --git a/kdecore/io/kdebugdbusiface.cpp b/kdecore/io/kdebugdbusiface.cpp
+index 6fbab74..4774034 100644
+--- a/kdecore/io/kdebugdbusiface.cpp
++++ b/kdecore/io/kdebugdbusiface.cpp
+@@ -24,9 +24,11 @@
+ 
+ KDebugDBusIface::KDebugDBusIface()
+ {
++#ifndef NO_DBUS
+     QDBusConnection::sessionBus().registerObject(QString::fromLatin1("/KDebug"), this, QDBusConnection::ExportScriptableSlots);
+     QDBusConnection::sessionBus().connect(QString(), QString(), QString::fromLatin1("org.kde.KDebug"),
+                                           QString::fromLatin1("configChanged"), this, SLOT(notifyKDebugConfigChanged()));
++#endif
+ }
+ 
+ KDebugDBusIface::~KDebugDBusIface()
+diff --git a/kdecore/network/ksslcertificatemanager.cpp b/kdecore/network/ksslcertificatemanager.cpp
+index c4e2766..5af9af9 100644
+--- a/kdecore/network/ksslcertificatemanager.cpp
++++ b/kdecore/network/ksslcertificatemanager.cpp
+@@ -30,9 +30,14 @@
+ #include <kstandarddirs.h>
+ #include <ktoolinvocation.h>
+ 
+-#include <QtDBus/QtDBus>
++#include <QtCore/QFile>
++#include <QtCore/QDir>
+ 
++#ifndef NO_DBUS
++#include <QtDBus/QtDBus>
+ #include "kssld/kssld_interface.h"
++#endif
++
+ #include "ksslcertificatemanager_p.h"
+ 
+ /*
+@@ -206,9 +211,13 @@ static QList<QSslCertificate> deduplicate(const QList<QSslCertificate> &certs)
+ 
+ KSslCertificateManagerPrivate::KSslCertificateManagerPrivate()
+  : config(QString::fromLatin1("ksslcertificatemanager"), KConfig::SimpleConfig),
++#ifndef NO_DBUS
+    iface(new org::kde::KSSLDInterface(QString::fromLatin1("org.kde.kded"),
+                                       QString::fromLatin1("/modules/kssld"),
+                                       QDBusConnection::sessionBus())),
++#else
++   iface(0),
++#endif
+    isCertListLoaded(false),
+    userCertDir(KGlobal::dirs()->saveLocation("data", QString::fromLatin1("kssl/userCaCertificates/")))
+ {
+@@ -449,10 +458,12 @@ K_GLOBAL_STATIC(KSslCertificateManagerContainer, g_instance)
+ KSslCertificateManager::KSslCertificateManager()
+  : d(new KSslCertificateManagerPrivate())
+ {
++#ifndef NO_DBUS
+     // Make sure kded is running
+     if (!QDBusConnection::sessionBus().interface()->isServiceRegistered(QString::fromLatin1("org.kde.kded"))) {
+         KToolInvocation::klauncher(); // this calls startKdeinit
+     }
++#endif
+ }
+ 
+ 
+@@ -471,26 +482,37 @@ KSslCertificateManager *KSslCertificateManager::self()
+ 
+ void KSslCertificateManager::setRule(const KSslCertificateRule &rule)
+ {
++#ifndef NO_DBUS
+     d->iface->setRule(rule);
++#endif
+ }
+ 
+ 
+ void KSslCertificateManager::clearRule(const KSslCertificateRule &rule)
+ {
++#ifndef NO_DBUS
+     d->iface->clearRule(rule);
++#endif
+ }
+ 
+ 
+ void KSslCertificateManager::clearRule(const QSslCertificate &cert, const QString &hostName)
+ {
++#ifndef NO_DBUS
+     d->iface->clearRule(cert, hostName);
++#endif
+ }
+ 
+ 
+ KSslCertificateRule KSslCertificateManager::rule(const QSslCertificate &cert,
+                                                  const QString &hostName) const
+ {
++#ifndef NO_DBUS
+     return d->iface->rule(cert, hostName);
++#else
++	kWarning() << "KSSlCertificateManager: D-BUS is disabled, returning default certificate rule";
++	return KSslCertificateRule();
++#endif
+ }
+ 
+ 
+@@ -530,4 +552,6 @@ void _setAllKsslCaCertificates(KSslCertificateManager *cm, const QList<KSslCaCer
+     KSslCertificateManagerPrivate::get(cm)->setAllCertificates(certsIn);
+ }
+ 
++#ifndef NO_DBUS
+ #include "kssld/kssld_interface.moc"
++#endif
+diff --git a/kdecore/network/ksslcertificatemanager_p.h b/kdecore/network/ksslcertificatemanager_p.h
+index cec6b78..318df5a 100644
+--- a/kdecore/network/ksslcertificatemanager_p.h
++++ b/kdecore/network/ksslcertificatemanager_p.h
+@@ -75,7 +75,11 @@ public:
+     QList<KSslCaCertificate> allCertificates() const;
+     
+     KConfig config;
++#ifndef NO_DBUS
+     org::kde::KSSLDInterface *iface;
++#else
++    QObject* iface;
++#endif
+     QHash<QString, KSslError::Error> stringToSslError;
+     QHash<KSslError::Error, QString> sslErrorToString;
+ 
+diff --git a/kdecore/services/kmimetype.cpp b/kdecore/services/kmimetype.cpp
+index e683c2b..27acef4 100644
+--- a/kdecore/services/kmimetype.cpp
++++ b/kdecore/services/kmimetype.cpp
+@@ -485,6 +485,7 @@ QString KMimeType::iconNameForUrl( const KUrl & _url, mode_t mode )
+ 
+ QString KMimeType::favIconForUrl( const KUrl& url )
+ {
++#ifndef NO_DBUS
+     if (url.isLocalFile()
+         || !url.protocol().startsWith(QLatin1String("http"))
+         || !KMimeTypeRepository::self()->useFavIcons())
+@@ -495,6 +496,9 @@ QString KMimeType::favIconForUrl( const KUrl& url )
+                          QString::fromLatin1("org.kde.FavIcon") );
+     QDBusReply<QString> result = kded.call( QString::fromLatin1("iconForUrl"), url.url() );
+     return result;              // default is QString()
++#else
++  return QString();
++#endif
+ }
+ 
+ QString KMimeType::comment( const KUrl &url) const
+diff --git a/kdecore/sycoca/ksycoca.cpp b/kdecore/sycoca/ksycoca.cpp
+index fea67fc..46a1e29 100644
+--- a/kdecore/sycoca/ksycoca.cpp
++++ b/kdecore/sycoca/ksycoca.cpp
+@@ -180,10 +180,12 @@ K_GLOBAL_STATIC(KSycocaSingleton, ksycocaInstance)
+ KSycoca::KSycoca()
+   : d(new KSycocaPrivate)
+ {
++#ifndef NO_DBUS
+     QDBusConnection::sessionBus().connect(QString(), QString(),
+                                           QString::fromLatin1("org.kde.KSycoca"),
+                                           QString::fromLatin1("notifyDatabaseChanged"),
+                                           this, SLOT(notifyDatabaseChanged(QStringList)));
++#endif
+ }
+ 
+ bool KSycocaPrivate::openDatabase(bool openDummyIfNotFound)
+@@ -407,6 +409,7 @@ bool KSycocaPrivate::checkVersion()
+ // and past the version number.
+ bool KSycocaPrivate::checkDatabase(BehaviorsIfNotFound ifNotFound)
+ {
++#ifndef NO_DBUS
+     if (databaseStatus == DatabaseOK) {
+         if (checkVersion()) // we know the version is ok, but we must rewind the stream anyway
+             return true;
+@@ -452,7 +455,7 @@ bool KSycocaPrivate::checkDatabase(BehaviorsIfNotFound ifNotFound)
+         }
+         return true;
+     }
+-
++#endif
+     return false;
+ }
+ 
+diff --git a/kdecore/tests/CMakeLists.txt b/kdecore/tests/CMakeLists.txt
+index 0ed5d98..16ef259 100644
+--- a/kdecore/tests/CMakeLists.txt
++++ b/kdecore/tests/CMakeLists.txt
+@@ -92,11 +92,16 @@ KDECORE_EXECUTABLE_TESTS(
+  kdebugtest
+  kcmdlineargstest
+  kmemtest
+- dbuscalltest
+  kmdcodectest
+- startserviceby
+ )
+ 
++if (NOT NO_DBUS)
++  KDECORE_EXECUTABLE_TESTS(
++    dbuscalltest
++    startserviceby
++  )
++endif (NOT NO_DBUS)
++
+ ########### klocaletest ###############
+ 
+ # compile into the test since it's not exported
+diff --git a/kdecore/tests/kdatetimetest.cpp b/kdecore/tests/kdatetimetest.cpp
+index 24a0264..a2f49c4 100644
+--- a/kdecore/tests/kdatetimetest.cpp
++++ b/kdecore/tests/kdatetimetest.cpp
+@@ -1335,6 +1335,7 @@ void KDateTimeTest::toClockTime()
+ 
+ void KDateTimeTest::toZone()
+ {
++#ifndef NO_DBUS
+     QEventLoop loop;
+     QTimer timer;
+     timer.setSingleShot(true);
+@@ -1446,6 +1447,9 @@ void KDateTimeTest::toZone()
+     QDBusConnection::sessionBus().send(message);
+     timer.start(1000);
+     loop.exec();
++#else
++  QSKIP( "kdecore compile without dbus support", SkipAll );
++#endif
+ }
+ 
+ void KDateTimeTest::toTimeSpec()
+diff --git a/kdecore/tests/klocaletest.cpp b/kdecore/tests/klocaletest.cpp
+index fd331ac..73f0ebd 100644
+--- a/kdecore/tests/klocaletest.cpp
++++ b/kdecore/tests/klocaletest.cpp
+@@ -258,9 +258,13 @@ KLocaleTest::formatDateTime()
+ 	QCOMPARE(locale.formatDateTime(qdt, KLocale::FancyLongDate), qdt.toString(full));
+ 
+ 	// The use of KSystemTimeZones requires kded to be running
++#ifndef NO_DBUS
+ 	if (!QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.kded")) {
+ 	    QSKIP( "kded not running", SkipAll );
+ 	}
++#else
++  QSKIP( "kdecore compile without dbus support", SkipAll );
++#endif
+ 
+ 	small = "%Y-%m-%d %H:%M";
+ 	smallsecs = "%Y-%m-%d %H:%M:%S";
+diff --git a/kdecore/tests/ktimezonestest.cpp b/kdecore/tests/ktimezonestest.cpp
+index b08ccde..29a6d19 100644
+--- a/kdecore/tests/ktimezonestest.cpp
++++ b/kdecore/tests/ktimezonestest.cpp
+@@ -164,6 +164,7 @@ void KTimeZonesTest::zonetabChange()
+     QVERIFY(!KSystemTimeZones::zone("Asia/Dili").isValid());
+     QVERIFY(KSystemTimeZones::zone("America/Los_Angeles").isValid());
+ 
++#ifndef NO_DBUS
+     // Check that 'london' is automatically updated with the new zone.tab
+     // contents, and that the new zones are added to KSystemTimeZones.
+     s_testData.writeZoneTab(true);
+@@ -207,6 +208,9 @@ void KTimeZonesTest::zonetabChange()
+     QVERIFY(KSystemTimeZones::zone("Africa/Cairo").isValid());
+     QVERIFY(!KSystemTimeZones::zone("Asia/Dili").isValid());
+     QVERIFY(KSystemTimeZones::zone("America/Los_Angeles").isValid());
++#else
++  QSKIP( "kdecore compile without dbus support", SkipAll );
++#endif
+ }
+ 
+ 
+-- 
+1.7.4.msysgit.0
+
