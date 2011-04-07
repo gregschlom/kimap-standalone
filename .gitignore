@@ -1,0 +1,9 @@
+build/
+include/
+lib/
+bin/
+doc/
+share/
+etc/
+
+build-all.py
