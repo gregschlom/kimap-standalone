@@ -58,6 +58,10 @@ def generateCmakeCommand(project, additionalOptions = {}):
         '-DCMAKE_CXX_FLAGS': '"-DKIMAP_STANDALONE -DNO_DBUS' + (' -DKDEWIN_STATIC_LIBS' if options.static else '') + '"'
     }
 
+    # When using a statically-linked version of Qt, we need to add ws2_32.lib
+    if os.name == 'nt':
+        baseOptions['-DCMAKE_CXX_STANDARD_LIBRARIES'] = '"kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib ws2_32.lib"'
+
     # Special case: if additionalOptions provides it's own value for CMAKE_CXX_FLAGS, we merge it with
     # the base option, instead of replacing it.
     if '-DCMAKE_CXX_FLAGS' in additionalOptions:
