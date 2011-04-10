@@ -1,7 +1,7 @@
-From e5b45c720e7584ce3bf0c027f0cb3482b1f06b69 Mon Sep 17 00:00:00 2001
+From 13c713de0a56ffb5b35b06de3fb5b64ae8a61712 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Thu, 10 Feb 2011 10:33:52 +0700
-Subject: [PATCH 1/2] patches to compile only kdecore
+Subject: [PATCH] patches to compile only kdecore
 
 ---
  CMakeLists.txt                       |   10 ++++++++++

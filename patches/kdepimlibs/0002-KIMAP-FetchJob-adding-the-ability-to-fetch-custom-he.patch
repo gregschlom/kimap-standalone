@@ -1,7 +1,7 @@
-From f08d1cb4a7e946ff28a6bcb8c9c05a2095399972 Mon Sep 17 00:00:00 2001
+From e02976a8da9eca5620a98895051606e8232a3595 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Thu, 10 Feb 2011 15:01:26 +0700
-Subject: [PATCH 2/5] KIMAP::FetchJob: adding the ability to fetch custom headers
+Subject: [PATCH] KIMAP::FetchJob: adding the ability to fetch custom headers
 
 ---
  kimap/fetchjob.cpp |    8 +++++++-

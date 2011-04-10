@@ -1,22 +1,22 @@
-From ecc2d60ded488e5912cced4ecd8d1607977e7944 Mon Sep 17 00:00:00 2001
+From e35fa75fec26d9789481198062df3ffceb3c6795 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Sat, 26 Mar 2011 11:18:09 +0700
-Subject: [PATCH 2/2] Adding CMake and C++ flag NO_DBUS to compile kdecore without dbus
+Subject: [PATCH] Adding CMake and C++ flag NO_DBUS to compile kdecore without dbus
 
 ---
- kdecore/CMakeLists.txt                     |   28 +++++++++++++++++++++++-----
- kdecore/config/kconfig.cpp                 |    2 ++
- kdecore/date/ksystemtimezone.cpp           |    5 ++++-
- kdecore/io/kdebugdbusiface.cpp             |    2 ++
- kdecore/network/ksslcertificatemanager.cpp |   26 +++++++++++++++++++++++++-
- kdecore/network/ksslcertificatemanager_p.h |    4 ++++
- kdecore/services/kmimetype.cpp             |    4 ++++
- kdecore/sycoca/ksycoca.cpp                 |    5 ++++-
- kdecore/tests/CMakeLists.txt               |    9 +++++++--
- kdecore/tests/kdatetimetest.cpp            |    4 ++++
- kdecore/tests/klocaletest.cpp              |    4 ++++
- kdecore/tests/ktimezonestest.cpp           |    4 ++++
- 12 files changed, 87 insertions(+), 10 deletions(-)
+ kdecore/CMakeLists.txt                     |   28 ++++++++++++++++++++++----
+ kdecore/config/kconfig.cpp                 |    6 +++++
+ kdecore/date/ksystemtimezone.cpp           |    9 +++++++-
+ kdecore/io/kdebugdbusiface.cpp             |    2 +
+ kdecore/network/ksslcertificatemanager.cpp |   29 +++++++++++++++++++++++++++-
+ kdecore/network/ksslcertificatemanager_p.h |    4 +++
+ kdecore/services/kmimetype.cpp             |    4 +++
+ kdecore/sycoca/ksycoca.cpp                 |    9 +++++++-
+ kdecore/tests/CMakeLists.txt               |    9 ++++++-
+ kdecore/tests/kdatetimetest.cpp            |    4 +++
+ kdecore/tests/klocaletest.cpp              |    4 +++
+ kdecore/tests/ktimezonestest.cpp           |    4 +++
+ 12 files changed, 102 insertions(+), 10 deletions(-)
 
 diff --git a/kdecore/CMakeLists.txt b/kdecore/CMakeLists.txt
 index 57945a8..a0a31a4 100644
@@ -108,10 +108,22 @@ index 57945a8..a0a31a4 100644
      set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
         util/klibloader.cpp
 diff --git a/kdecore/config/kconfig.cpp b/kdecore/config/kconfig.cpp
-index 35eb7a3..412763a 100644
+index 35eb7a3..5ee5894 100644
 --- a/kdecore/config/kconfig.cpp
 +++ b/kdecore/config/kconfig.cpp
-@@ -401,6 +401,7 @@ void KConfig::markAsClean()
+@@ -34,7 +34,11 @@
+ #include <kstandarddirs.h>
+ #include <kurl.h>
+ #include <kcomponentdata.h>
++
++#ifndef NO_DBUS
+ #include <ktoolinvocation.h>
++#endif
++
+ #include <kaboutdata.h>
+ #include <kdebug.h>
+ 
+@@ -401,6 +405,7 @@ void KConfig::markAsClean()
  
  void KConfig::checkUpdate(const QString &id, const QString &updateFile)
  {
@@ -119,7 +131,7 @@ index 35eb7a3..412763a 100644
      const KConfigGroup cg(this, "$Version");
      const QString cfg_id = updateFile+QLatin1Char(':')+id;
      const QStringList ids = cg.readEntry("update_info", QStringList());
-@@ -408,6 +409,7 @@ void KConfig::checkUpdate(const QString &id, const QString &updateFile)
+@@ -408,6 +413,7 @@ void KConfig::checkUpdate(const QString &id, const QString &updateFile)
          KToolInvocation::kdeinitExecWait(QString::fromLatin1("kconf_update"), QStringList() << QString::fromLatin1("--check") << updateFile);
          reparseConfiguration();
      }
@@ -128,10 +140,22 @@ index 35eb7a3..412763a 100644
  
  KConfig* KConfig::copyTo(const QString &file, KConfig *config) const
 diff --git a/kdecore/date/ksystemtimezone.cpp b/kdecore/date/ksystemtimezone.cpp
-index 446ce4e..974cd7e 100644
+index 446ce4e..5d0bf34 100644
 --- a/kdecore/date/ksystemtimezone.cpp
 +++ b/kdecore/date/ksystemtimezone.cpp
-@@ -179,12 +179,14 @@ K_GLOBAL_STATIC(KTimeZone, simulatedLocalZone)
+@@ -52,7 +52,11 @@
+ #include <kcodecs.h>
+ #include <kstringhandler.h>
+ #include <ktemporaryfile.h>
++
++#ifndef NO_DBUS
+ #include <ktoolinvocation.h>
++#endif
++
+ #include <kdebug.h>
+ #include <kconfiggroup.h>
+ #include "ktzfiletimezone.h"
+@@ -179,12 +183,14 @@ K_GLOBAL_STATIC(KTimeZone, simulatedLocalZone)
  KSystemTimeZones::KSystemTimeZones()
    : d(0)
  {
@@ -146,7 +170,7 @@ index 446ce4e..974cd7e 100644
  }
  
  KSystemTimeZones::~KSystemTimeZones()
-@@ -297,6 +299,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
+@@ -297,6 +303,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
          // A KSystemTimeZones instance is required only to catch D-Bus signals.
          m_parent = new KSystemTimeZones;
          // Ensure that the KDED time zones module has initialized. The call loads the module on demand.
@@ -154,7 +178,7 @@ index 446ce4e..974cd7e 100644
          if (!QDBusConnection::sessionBus().interface()->isServiceRegistered(QLatin1String("org.kde.kded")))
              KToolInvocation::klauncher();   // this calls startKdeinit, and blocks until it returns
          const QString dbusIface = QString::fromLatin1(KTIMEZONED_DBUS_IFACE);
-@@ -307,7 +310,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
+@@ -307,7 +314,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
              kError(161) << "KSystemTimeZones: ktimezoned initialize() D-Bus call failed: " << reply.error().message() << endl;
  kDebug(161)<<"instance(): ... initialised";
          delete ktimezoned;
@@ -180,12 +204,17 @@ index 6fbab74..4774034 100644
  
  KDebugDBusIface::~KDebugDBusIface()
 diff --git a/kdecore/network/ksslcertificatemanager.cpp b/kdecore/network/ksslcertificatemanager.cpp
-index c4e2766..5af9af9 100644
+index c4e2766..37c03dc 100644
 --- a/kdecore/network/ksslcertificatemanager.cpp
 +++ b/kdecore/network/ksslcertificatemanager.cpp
-@@ -30,9 +30,14 @@
+@@ -28,11 +28,19 @@
+ #include <kglobal.h>
+ #include <klocale.h>
  #include <kstandarddirs.h>
++
++#ifndef NO_DBUS
  #include <ktoolinvocation.h>
++#endif
  
 -#include <QtDBus/QtDBus>
 +#include <QtCore/QFile>
@@ -199,7 +228,7 @@ index c4e2766..5af9af9 100644
  #include "ksslcertificatemanager_p.h"
  
  /*
-@@ -206,9 +211,13 @@ static QList<QSslCertificate> deduplicate(const QList<QSslCertificate> &certs)
+@@ -206,9 +214,13 @@ static QList<QSslCertificate> deduplicate(const QList<QSslCertificate> &certs)
  
  KSslCertificateManagerPrivate::KSslCertificateManagerPrivate()
   : config(QString::fromLatin1("ksslcertificatemanager"), KConfig::SimpleConfig),
@@ -213,7 +242,7 @@ index c4e2766..5af9af9 100644
     isCertListLoaded(false),
     userCertDir(KGlobal::dirs()->saveLocation("data", QString::fromLatin1("kssl/userCaCertificates/")))
  {
-@@ -449,10 +458,12 @@ K_GLOBAL_STATIC(KSslCertificateManagerContainer, g_instance)
+@@ -449,10 +461,12 @@ K_GLOBAL_STATIC(KSslCertificateManagerContainer, g_instance)
  KSslCertificateManager::KSslCertificateManager()
   : d(new KSslCertificateManagerPrivate())
  {
@@ -226,7 +255,7 @@ index c4e2766..5af9af9 100644
  }
  
  
-@@ -471,26 +482,37 @@ KSslCertificateManager *KSslCertificateManager::self()
+@@ -471,26 +485,37 @@ KSslCertificateManager *KSslCertificateManager::self()
  
  void KSslCertificateManager::setRule(const KSslCertificateRule &rule)
  {
@@ -264,7 +293,7 @@ index c4e2766..5af9af9 100644
  }
  
  
-@@ -530,4 +552,6 @@ void _setAllKsslCaCertificates(KSslCertificateManager *cm, const QList<KSslCaCer
+@@ -530,4 +555,6 @@ void _setAllKsslCaCertificates(KSslCertificateManager *cm, const QList<KSslCaCer
      KSslCertificateManagerPrivate::get(cm)->setAllCertificates(certsIn);
  }
  
@@ -310,10 +339,22 @@ index e683c2b..27acef4 100644
  
  QString KMimeType::comment( const KUrl &url) const
 diff --git a/kdecore/sycoca/ksycoca.cpp b/kdecore/sycoca/ksycoca.cpp
-index fea67fc..46a1e29 100644
+index fea67fc..c958438 100644
 --- a/kdecore/sycoca/ksycoca.cpp
 +++ b/kdecore/sycoca/ksycoca.cpp
-@@ -180,10 +180,12 @@ K_GLOBAL_STATIC(KSycocaSingleton, ksycocaInstance)
+@@ -22,7 +22,11 @@
+ #include "ksycoca_p.h"
+ #include "ksycocatype.h"
+ #include "ksycocafactory.h"
++
++#ifndef NO_DBUS
+ #include "ktoolinvocation.h"
++#endif
++
+ #include "kglobal.h"
+ #include "kmemfile.h"
+ #include "kde_file.h"
+@@ -180,10 +184,12 @@ K_GLOBAL_STATIC(KSycocaSingleton, ksycocaInstance)
  KSycoca::KSycoca()
    : d(new KSycocaPrivate)
  {
@@ -326,7 +367,7 @@ index fea67fc..46a1e29 100644
  }
  
  bool KSycocaPrivate::openDatabase(bool openDummyIfNotFound)
-@@ -407,6 +409,7 @@ bool KSycocaPrivate::checkVersion()
+@@ -407,6 +413,7 @@ bool KSycocaPrivate::checkVersion()
  // and past the version number.
  bool KSycocaPrivate::checkDatabase(BehaviorsIfNotFound ifNotFound)
  {
@@ -334,7 +375,7 @@ index fea67fc..46a1e29 100644
      if (databaseStatus == DatabaseOK) {
          if (checkVersion()) // we know the version is ok, but we must rewind the stream anyway
              return true;
-@@ -452,7 +455,7 @@ bool KSycocaPrivate::checkDatabase(BehaviorsIfNotFound ifNotFound)
+@@ -452,7 +459,7 @@ bool KSycocaPrivate::checkDatabase(BehaviorsIfNotFound ifNotFound)
          }
          return true;
      }

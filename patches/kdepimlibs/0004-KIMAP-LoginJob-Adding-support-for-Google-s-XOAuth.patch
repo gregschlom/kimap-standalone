@@ -1,7 +1,7 @@
-From 881521bb895ada88569ec68cc3a93befb24cde96 Mon Sep 17 00:00:00 2001
+From 41cc4f8321e029bf2ad8491763a9573912617360 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Mon, 7 Mar 2011 23:27:39 +0700
-Subject: [PATCH 4/5] KIMAP::LoginJob: Adding support for Google's XOAuth
+Subject: [PATCH] KIMAP::LoginJob: Adding support for Google's XOAuth
 
 ---
  kimap/loginjob.cpp |   78 ++++++++++++++++++++++++++++-----------------------
@@ -9,10 +9,10 @@ Subject: [PATCH 4/5] KIMAP::LoginJob: Adding support for Google's XOAuth
  2 files changed, 45 insertions(+), 36 deletions(-)
 
 diff --git a/kimap/loginjob.cpp b/kimap/loginjob.cpp
-index 0f13ef4..139f873 100644
+index e57ebd2..cb2a935 100644
 --- a/kimap/loginjob.cpp
 +++ b/kimap/loginjob.cpp
-@@ -348,49 +348,55 @@ void LoginJob::handleResponse( const Message &response )
+@@ -352,49 +352,55 @@ void LoginJob::handleResponse( const Message &response )
  
  bool LoginJobPrivate::startAuthentication()
  {
@@ -103,7 +103,7 @@ index 0f13ef4..139f873 100644
    if ( challenge.isEmpty() ) {
      tags << sessionInternal()->sendCommand( "AUTHENTICATE", authMode.toLatin1() );
    } else {
-@@ -481,6 +487,8 @@ void LoginJob::setAuthenticationMode(AuthenticationMode mode)
+@@ -485,6 +491,8 @@ void LoginJob::setAuthenticationMode(AuthenticationMode mode)
        break;
      case Anonymous: d->authMode = "ANONYMOUS";
        break;
@@ -113,7 +113,7 @@ index 0f13ef4..139f873 100644
        d->authMode = "";
    }
 diff --git a/kimap/loginjob.h b/kimap/loginjob.h
-index 157f5bc..cd45194 100644
+index 0987c0b..022483c 100644
 --- a/kimap/loginjob.h
 +++ b/kimap/loginjob.h
 @@ -56,7 +56,8 @@ class KIMAP_EXPORT LoginJob : public Job

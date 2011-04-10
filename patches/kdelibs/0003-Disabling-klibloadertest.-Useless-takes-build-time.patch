@@ -1,0 +1,48 @@
+From ae4a522c3e77cb66463854da2d754ed424194eeb Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Sun, 10 Apr 2011 21:40:57 +0700
+Subject: [PATCH] Disabling klibloadertest. Useless, takes build time.
+
+---
+ kdecore/tests/CMakeLists.txt |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/kdecore/tests/CMakeLists.txt b/kdecore/tests/CMakeLists.txt
+index 16ef259..5a0f828 100644
+--- a/kdecore/tests/CMakeLists.txt
++++ b/kdecore/tests/CMakeLists.txt
+@@ -71,11 +71,11 @@ KDECORE_UNIT_TESTS(
+  kdebug_qcoreapptest
+ )
+ 
+-if(NOT KDE_NO_DEPRECATED)
++if(NOT KDE_NO_DEPRECATED AND NOT KIMAP_STANDALONE)
+  KDECORE_UNIT_TESTS(
+   klibloadertest
+  )
+-endif(NOT KDE_NO_DEPRECATED)
++endif(NOT KDE_NO_DEPRECATED AND NOT KIMAP_STANDALONE)
+ 
+ if(UNIX)
+  KDECORE_UNIT_TESTS(
+@@ -154,7 +154,7 @@ endif (NOT KIMAP_STANDALONE)
+ 
+ ########### module for klibloadertest ###############
+ 
+-if(NOT KDE_NO_DEPRECATED)
++if(NOT KDE_NO_DEPRECATED AND NOT KIMAP_STANDALONE)
+ set(klibloadertestmodule_PART_SRCS klibloadertest_module.cpp )
+ 
+ kde4_add_plugin(klibloadertestmodule ${klibloadertestmodule_PART_SRCS})
+@@ -162,7 +162,7 @@ kde4_add_plugin(klibloadertestmodule ${klibloadertestmodule_PART_SRCS})
+ target_link_libraries(klibloadertestmodule  ${KDE4_KDECORE_LIBS} ${QT_QTTEST_LIBRARY})
+ 
+ set_target_properties(klibloadertestmodule PROPERTIES SKIP_BUILD_RPATH FALSE BUILD_WITH_INSTALL_RPATH FALSE)
+-endif(NOT KDE_NO_DEPRECATED)
++endif(NOT KDE_NO_DEPRECATED AND NOT KIMAP_STANDALONE)
+ 
+ ########### module for klibloadertest4 ###############
+ 
+-- 
+1.7.4.msysgit.0
+

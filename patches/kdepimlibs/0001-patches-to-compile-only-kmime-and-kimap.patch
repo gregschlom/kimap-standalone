@@ -1,7 +1,7 @@
-From b957758c49deab62196302b816e3bd92b2e69faa Mon Sep 17 00:00:00 2001
+From ec6c7110e2c71e580c6731e2096dd770dd831cb2 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Thu, 10 Feb 2011 10:34:28 +0700
-Subject: [PATCH 1/5] patches to compile only kmime and kimap
+Subject: [PATCH] patches to compile only kmime and kimap
 
 ---
  CMakeLists.txt                  |   22 ++++++++++++++++++----
