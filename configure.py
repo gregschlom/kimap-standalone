@@ -54,6 +54,7 @@ def generateCmakeCommand(project, additionalOptions = {}):
         '-DKDE4_BUILD_TESTS': 'ON' if options.tests else 'OFF',
         '-DKIMAP_STANDALONE': 'ON',
         '-DNO_DBUS': 'ON',
+        '-DKDE_PLATFORM_FEATURE_DISABLE_DEPRECATED': 'ON',
         '-DCMAKE_CXX_FLAGS': '"-DKIMAP_STANDALONE -DNO_DBUS' + (' -DKDEWIN_STATIC_LIBS' if options.static else '') + '"'
     }
 
