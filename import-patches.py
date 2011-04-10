@@ -10,6 +10,7 @@ answer = raw_input('Do you want to continue? [y/n]')
 if answer.lower().startswith('y'):
     patched_repos = ['kdelibs', 'kdepimlibs']
     for repo in patched_repos:
-        os.system('cd src/' + repo + ' && git checkout master && git branch -D kimap-standalone && git checkout -b kimap-standalone && git am ../../patches/' + repo + '/*')
+        os.system('cd src/' + repo + ' && git checkout master && git branch -D kimap-standalone')
+        os.system('cd src/' + repo + ' && git checkout -b kimap-standalone && git am ../../patches/' + repo + '/*')
 else:
     print 'Operation canceled'
