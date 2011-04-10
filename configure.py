@@ -66,7 +66,7 @@ def generateCmakeCommand(project, additionalOptions = {}):
         pass    # makdeirs raise an exception if the folder already exist, ignore it.
        
     command = 'cmake ' \
-                + ('-G "NMake Makefiles JOM" ' if os.name == 'nt' else '') \
+                + ('-G "NMake Makefiles" ' if os.name == 'nt' else '') \
                 + dictToString(baseOptions) \
                 + dictToString(additionalOptions) \
                 + '"' + rootPath + '\\src\\' + project + '"'
