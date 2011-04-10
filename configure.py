@@ -63,9 +63,9 @@ def generateCmakeCommand(project, additionalOptions = {}):
         # When using a statically-linked version of Qt, we need to add ws2_32.lib
         baseOptions['-DCMAKE_CXX_STANDARD_LIBRARIES'] = '"kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib ws2_32.lib"'
 
-        # With MSVC in Release mode, use Whole Program Optimization, disable exceptions
+        # With MSVC in Release mode, use Whole Program Optimization
         # Todo: we should check that we're using MSVC and not Mingw before setting those flags.
-        baseOptions['-DCMAKE_CXX_FLAGS_RELEASE:STRING'] = '"/MD /O2 /Ob2 /D /GL /EHs-c- /D NDEBUG -DQT_NO_DEBUG"'
+        baseOptions['-DCMAKE_CXX_FLAGS_RELEASE:STRING'] = '"/MD /O2 /Ob2 /D /GL /D NDEBUG -DQT_NO_DEBUG"'
         baseOptions['-DCMAKE_EXE_LINKER_FLAGS_RELEASE:STRING'] = '"/LTCG /INCREMENTAL:NO /NODEFAULTLIB:libcmt /DEFAULTLIB:msvcrt"'
 
     # Special case: if additionalOptions provides it's own value for CMAKE_CXX_FLAGS, we merge it with
