@@ -58,6 +58,13 @@ def generateCmakeCommand(project, additionalOptions = {}):
         '-DCMAKE_CXX_FLAGS': '"-DKIMAP_STANDALONE -DNO_DBUS' + (' -DKDEWIN_STATIC_LIBS' if options.static else '') + '"'
     }
 
+    # Special case: if additionalOptions provides it's own value for CMAKE_CXX_FLAGS, we merge it with
+    # the base option, instead of replacing it.
+    if '-DCMAKE_CXX_FLAGS' in additionalOptions:
+        baseOptions['-DCMAKE_CXX_FLAGS'] = baseOptions['-DCMAKE_CXX_FLAGS'].rstrip('"') \
+                                         + ' '  + additionalOptions['-DCMAKE_CXX_FLAGS'].lstrip('"')
+        del additionalOptions['-DCMAKE_CXX_FLAGS']
+
     buildFolder = rootPath + '/build/' + project
     buildFolders.append(buildFolder)
 
