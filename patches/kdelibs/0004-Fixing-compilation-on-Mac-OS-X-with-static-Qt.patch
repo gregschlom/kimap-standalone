@@ -1,0 +1,86 @@
+From 2f9634b176f7db35b214fc0fd2eb3f994d1d66b8 Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Sat, 30 Jul 2011 16:49:23 -0700
+Subject: [PATCH] Fixing compilation on Mac OS X with static Qt
+
+---
+ kdecore/date/ksystemtimezone.cpp        |    4 ----
+ kdecore/io/kdebugdbusiface.cpp          |    1 -
+ kdecore/kconfig_compiler/CMakeLists.txt |    5 ++++-
+ kdecore/services/kmimetype.cpp          |    3 ++-
+ kdecore/sycoca/ksycoca.cpp              |    1 -
+ 5 files changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/kdecore/date/ksystemtimezone.cpp b/kdecore/date/ksystemtimezone.cpp
+index 5d0bf34..3e940fc 100644
+--- a/kdecore/date/ksystemtimezone.cpp
++++ b/kdecore/date/ksystemtimezone.cpp
+@@ -42,10 +42,6 @@
+ #include <QtCore/QRegExp>
+ #include <QtCore/QStringList>
+ #include <QtCore/QTextStream>
+-#include <QtDBus/QDBusConnection>
+-#include <QtDBus/QDBusInterface>
+-#include <QtDBus/QDBusConnectionInterface>
+-#include <QtDBus/QDBusReply>
+ 
+ #include <kglobal.h>
+ #include <klocale.h>
+diff --git a/kdecore/io/kdebugdbusiface.cpp b/kdecore/io/kdebugdbusiface.cpp
+index 4774034..9f22427 100644
+--- a/kdecore/io/kdebugdbusiface.cpp
++++ b/kdecore/io/kdebugdbusiface.cpp
+@@ -19,7 +19,6 @@
+ */
+ 
+ #include "kdebugdbusiface_p.h"
+-#include <QtDBus/QtDBus>
+ #include "kdebug.h"
+ 
+ KDebugDBusIface::KDebugDBusIface()
+diff --git a/kdecore/kconfig_compiler/CMakeLists.txt b/kdecore/kconfig_compiler/CMakeLists.txt
+index 167b81e..8376336 100644
+--- a/kdecore/kconfig_compiler/CMakeLists.txt
++++ b/kdecore/kconfig_compiler/CMakeLists.txt
+@@ -14,7 +14,10 @@
+    kde4_add_executable(kconfig_compiler NOGUI ${kconfig_compiler_SRCS})
+ 
+    target_link_libraries(kconfig_compiler  ${QT_QTCORE_LIBRARY} ${QT_QTXML_LIBRARY} )
+-
++   IF(APPLE)
++      target_link_libraries(kconfig_compiler "-framework CoreFoundation -framework CoreServices -lz")
++   ENDIF(APPLE)
++ 
+    # "export" this target too so we can use the LOCATION property of the imported target in
+    # FindKDE4Internal.cmake to get the full path to the installed executable instead of using FIND_PROGRAM(), Alex
+    install(TARGETS kconfig_compiler EXPORT kdelibsToolsTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )
+diff --git a/kdecore/services/kmimetype.cpp b/kdecore/services/kmimetype.cpp
+index 27acef4..1143c78 100644
+--- a/kdecore/services/kmimetype.cpp
++++ b/kdecore/services/kmimetype.cpp
+@@ -33,8 +33,9 @@
+ #include <kurl.h>
+ 
+ #include <QtCore/QFile>
+-#include <QtDBus/QtDBus>
+ #include <QBuffer>
++#include <QStack>
++#include <QXmlStreamReader>
+ 
+ extern int servicesDebugArea();
+ 
+diff --git a/kdecore/sycoca/ksycoca.cpp b/kdecore/sycoca/ksycoca.cpp
+index c958438..27b47e0 100644
+--- a/kdecore/sycoca/ksycoca.cpp
++++ b/kdecore/sycoca/ksycoca.cpp
+@@ -41,7 +41,6 @@
+ #include <QtCore/QFile>
+ #include <QtCore/QBuffer>
+ #include <QProcess>
+-#include <QtDBus/QtDBus>
+ 
+ #include <config.h>
+ 
+-- 
+1.7.6
+

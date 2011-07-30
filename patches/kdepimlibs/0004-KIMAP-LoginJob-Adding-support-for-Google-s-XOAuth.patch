@@ -1,4 +1,4 @@
-From 41cc4f8321e029bf2ad8491763a9573912617360 Mon Sep 17 00:00:00 2001
+From 58f4505791f052351eb9366b29cb4c19c8c05afd Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Mon, 7 Mar 2011 23:27:39 +0700
 Subject: [PATCH] KIMAP::LoginJob: Adding support for Google's XOAuth
@@ -127,5 +127,5 @@ index 0987c0b..022483c 100644
  
      explicit LoginJob( Session *session );
 -- 
-1.7.4.msysgit.0
+1.7.6
 

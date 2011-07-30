@@ -1,4 +1,4 @@
-From ec6c7110e2c71e580c6731e2096dd770dd831cb2 Mon Sep 17 00:00:00 2001
+From 24c31d5f87a5a0dd58e0a6f6d75bf97601671762 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Thu, 10 Feb 2011 10:34:28 +0700
 Subject: [PATCH] patches to compile only kmime and kimap
@@ -115,5 +115,5 @@ index f5ae49f..a16fc48 100644
  
  add_kmime_test(rfc2047test.cpp)
 -- 
-1.7.4.msysgit.0
+1.7.6
 

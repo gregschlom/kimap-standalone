@@ -1,4 +1,4 @@
-From 13c713de0a56ffb5b35b06de3fb5b64ae8a61712 Mon Sep 17 00:00:00 2001
+From 69fed2a556bdc6e0d38ee886c6a65b18deb6e455 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Thu, 10 Feb 2011 10:33:52 +0700
 Subject: [PATCH] patches to compile only kdecore
@@ -193,5 +193,5 @@ index 9703c7d..0ed5d98 100644
  ########### module for klibloadertest ###############
  
 -- 
-1.7.4.msysgit.0
+1.7.6
 

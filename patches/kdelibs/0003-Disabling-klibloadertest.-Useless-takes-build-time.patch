@@ -1,4 +1,4 @@
-From ae4a522c3e77cb66463854da2d754ed424194eeb Mon Sep 17 00:00:00 2001
+From 42e2617a795325abc8269b83eabb2e388a70232a Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Sun, 10 Apr 2011 21:40:57 +0700
 Subject: [PATCH] Disabling klibloadertest. Useless, takes build time.
@@ -44,5 +44,5 @@ index 16ef259..5a0f828 100644
  ########### module for klibloadertest4 ###############
  
 -- 
-1.7.4.msysgit.0
+1.7.6
 
