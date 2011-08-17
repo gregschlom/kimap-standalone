@@ -142,7 +142,8 @@ print 'Using qmake executable at "' + options.qmake + '"\n'
 generateCmakeCommand("3rdparty/boost");
 
 ## Cyrus-sasl
-generateCmakeCommand("3rdparty/cyrus-sasl", {'-DSTATIC_PLUGIN=': 'ON' if options.static else 'OFF'})
+if os.name == "nt":
+  generateCmakeCommand("3rdparty/cyrus-sasl", {'-DSTATIC_PLUGIN=': 'ON' if options.static else 'OFF'})
 
 ## ZLib
 generateCmakeCommand("3rdparty/zlib");
