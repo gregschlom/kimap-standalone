@@ -1,18 +1,18 @@
-From 69fed2a556bdc6e0d38ee886c6a65b18deb6e455 Mon Sep 17 00:00:00 2001
+From 5699857950d030d12e1639b53186d37d60d43f8f Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Thu, 10 Feb 2011 10:33:52 +0700
 Subject: [PATCH] patches to compile only kdecore
 
 ---
- CMakeLists.txt                       |   10 ++++++++++
+ CMakeLists.txt                       |    9 ++++++++-
  cmake/modules/FindKDE4Internal.cmake |    3 ++-
  kdecore/CMakeLists.txt               |   12 ++++++------
  kdecore/localization/kcatalog.cpp    |    4 ++++
  kdecore/tests/CMakeLists.txt         |    2 ++
- 5 files changed, 24 insertions(+), 7 deletions(-)
+ 5 files changed, 22 insertions(+), 8 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 482225b..6cda8f8 100644
+index 86cbf20..070bf2c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -70,6 +70,7 @@ macro_log_feature(PERL_FOUND "Perl" "Needed for building kdelibs" "http://www.pe
@@ -26,12 +26,12 @@ index 482225b..6cda8f8 100644
 @@ -84,6 +85,7 @@ macro_log_feature(STRIGI_FOUND "Strigi" "Desktop indexing and search support" "h
  set(LIBATTICA_MIN_VERSION "0.1.90")
  find_package(LibAttica)
- macro_log_feature(LIBATTICA_FOUND "libattica" "Support for Get Hot New Stuff" "git clone git://git.kde.org/attica" TRUE "${LIBATTICA_MIN_VERSION}" "")
+ macro_log_feature(LIBATTICA_FOUND "libattica" "Support for Get Hot New Stuff" "git clone git://anongit.kde.org/attica" TRUE "${LIBATTICA_MIN_VERSION}" "")
 +endif (NOT KIMAP_STANDALONE)
  
  #optional features
  if(X11_FOUND)
-@@ -124,8 +126,10 @@ macro_log_feature(SHAREDDESKTOPONTOLOGIES_FOUND "Shared desktop ontologies" "Sup
+@@ -119,8 +121,10 @@ macro_log_feature(SHAREDDESKTOPONTOLOGIES_FOUND "Shared desktop ontologies" "Sup
  macro_optional_find_package(QCA2)
  macro_log_feature(QCA2_FOUND "QCA2" "Support for remote plasma widgets" "http://delta.affinix.com/qca" FALSE "2.0.0" "")
  
@@ -42,7 +42,7 @@ index 482225b..6cda8f8 100644
  
  ################# Disallow in-source build #################
  
-@@ -282,6 +286,7 @@ check_library_exists(socket connect "" HAVE_SOCKET_LIBRARY)
+@@ -278,6 +282,7 @@ check_library_exists(socket connect "" HAVE_SOCKET_LIBRARY)
  
  add_subdirectory( cmake )
  add_subdirectory( kdecore )
@@ -50,30 +50,22 @@ index 482225b..6cda8f8 100644
  add_subdirectory( kdeui )
  if (UNIX)
     add_subdirectory( kpty )
-@@ -330,9 +335,12 @@ add_subdirectory( plasma )
+@@ -326,10 +331,12 @@ add_subdirectory( plasma )
  endif(NOT WINCE)
  add_subdirectory( kunitconversion )
  add_subdirectory( kdewebkit )
 +endif (NOT KIMAP_STANDALONE)
  add_subdirectory( includes )
- 
+-
 +if (NOT KIMAP_STANDALONE)
+ add_subdirectory( experimental )
  macro_optional_add_subdirectory( doc  )
 +endif (NOT KIMAP_STANDALONE)
  
  ################# write dependency file which will be installed #################
  
-@@ -362,6 +370,8 @@ install( EXPORT kdelibsToolsTargets   DESTINATION ${DATA_INSTALL_DIR}/cmake/modu
- # the following will be the correct locations once cmake has the improved FIND_PACKAGE()
- # install( FILES ${CMAKE_CURRENT_BINARY_DIR}/KDELibsDependencies.cmake DESTINATION ${PLUGIN_INSTALL_DIR}/cmake RENAME KDE4Config.cmake)
- 
-+if (NOT KIMAP_STANDALONE)
- macro_optional_add_subdirectory( experimental )
-+endif (NOT KIMAP_STANDALONE)
- 
- macro_display_feature_log()
 diff --git a/cmake/modules/FindKDE4Internal.cmake b/cmake/modules/FindKDE4Internal.cmake
-index cf221a5..bb1cab3 100644
+index ef705fb..e410fc8 100644
 --- a/cmake/modules/FindKDE4Internal.cmake
 +++ b/cmake/modules/FindKDE4Internal.cmake
 @@ -702,6 +702,7 @@ endif(_kdeBootStrapping  OR  TARGET ${KDE4_TARGET_PREFIX}nepomuk)
@@ -94,10 +86,10 @@ index cf221a5..bb1cab3 100644
  #####################  provide some options   ##########################################
  
 diff --git a/kdecore/CMakeLists.txt b/kdecore/CMakeLists.txt
-index f78c115..57945a8 100644
+index 4d96b50..58328f7 100644
 --- a/kdecore/CMakeLists.txt
 +++ b/kdecore/CMakeLists.txt
-@@ -147,9 +147,9 @@ endif (UNIX)
+@@ -166,9 +166,9 @@ endif (UNIX)
  add_subdirectory( kconfig_compiler )
  add_subdirectory( tests )
  add_subdirectory( sonnet/tests )
@@ -109,7 +101,7 @@ index f78c115..57945a8 100644
  
  ########### next target ###############
  
-@@ -434,7 +434,7 @@ if (NOT "${KDE4_AUTH_BACKEND_NAME}" STREQUAL "FAKE")
+@@ -454,7 +454,7 @@ if (NOT "${KDE4_AUTH_BACKEND_NAME}" STREQUAL "FAKE")
      install( TARGETS kauth-policy-gen EXPORT kdelibsToolsTargets DESTINATION ${LIBEXEC_INSTALL_DIR})
  endif (NOT "${KDE4_AUTH_BACKEND_NAME}" STREQUAL "FAKE")
  
@@ -118,7 +110,7 @@ index f78c115..57945a8 100644
      ########### next target ###############
  
      # KAuth backend plugin
-@@ -463,7 +463,7 @@ if ( NOT WINCE )
+@@ -483,7 +483,7 @@ if ( NOT WINCE )
                  RUNTIME DESTINATION ${KAUTH_HELPER_PLUGIN_DIR}
          )
      endif (NOT "${KDE4_AUTH_HELPER_BACKEND_NAME}" STREQUAL "FAKE")
@@ -127,7 +119,7 @@ index f78c115..57945a8 100644
  
  ########### next target ###############
  
-@@ -478,7 +478,7 @@ install(TARGETS kde4-config ${INSTALL_TARGETS_DEFAULT_ARGS} )
+@@ -498,7 +498,7 @@ install(TARGETS kde4-config ${INSTALL_TARGETS_DEFAULT_ARGS} )
  
  ########### next target ###############
  
@@ -136,7 +128,7 @@ index f78c115..57945a8 100644
      # kjs hash stuff for transcript plugin
      set( CREATE_HASH_TABLE ${CMAKE_SOURCE_DIR}/kjs/create_hash_table )
  
-@@ -509,7 +509,7 @@ if(NOT WINCE)
+@@ -529,7 +529,7 @@ if(NOT WINCE)
  
      install( TARGETS ktranscript DESTINATION ${PLUGIN_INSTALL_DIR} )
  
@@ -175,10 +167,10 @@ index 1f01688..1fd3024 100644
  }
  
 diff --git a/kdecore/tests/CMakeLists.txt b/kdecore/tests/CMakeLists.txt
-index 9703c7d..0ed5d98 100644
+index 7c3db77..1b67c56 100644
 --- a/kdecore/tests/CMakeLists.txt
 +++ b/kdecore/tests/CMakeLists.txt
-@@ -139,11 +139,13 @@ target_link_libraries(kmimeglobsfileparsertest ${KDE4_KDECORE_LIBS} ${QT_QTTEST_
+@@ -141,11 +141,13 @@ target_link_libraries(kmimeglobsfileparsertest ${KDE4_KDECORE_LIBS} ${QT_QTTEST_
  
  # compile httpfilter.cpp into the test since it's not part of kdelibs
  # (only par of kio_http and kmultipart)
@@ -193,5 +185,5 @@ index 9703c7d..0ed5d98 100644
  ########### module for klibloadertest ###############
  
 -- 
-1.7.6
+1.7.4.msysgit.0
 

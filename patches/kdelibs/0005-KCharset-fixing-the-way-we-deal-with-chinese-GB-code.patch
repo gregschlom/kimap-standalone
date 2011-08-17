@@ -1,0 +1,74 @@
+From 23cafc896dbdacd450d50c549cdfd528a32f1b34 Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Wed, 17 Aug 2011 11:48:37 -0700
+Subject: [PATCH] KCharset: fixing the way we deal with chinese GB* codecs:
+ - Don't assume they will always exist on the system
+ - Don't take a separate code path to find those codecs
+
+---
+ kdecore/localization/kcharsets.cpp |   24 +++++++++++++-----------
+ 1 files changed, 13 insertions(+), 11 deletions(-)
+
+diff --git a/kdecore/localization/kcharsets.cpp b/kdecore/localization/kcharsets.cpp
+index a136fa4..65d8c2d 100644
+--- a/kdecore/localization/kcharsets.cpp
++++ b/kdecore/localization/kcharsets.cpp
+@@ -688,8 +688,6 @@ QList<QStringList> KCharsets::encodingsByScript() const
+ 
+ QTextCodec* KCharsets::codecForName(const QString &n) const
+ {
+-    if ( n == QLatin1String("gb2312") || n == QLatin1String("gbk") )
+-        return QTextCodec::codecForName( "gb18030" );
+     const QByteArray name( n.toLatin1() );
+     QTextCodec* codec = codecForNameOrNull( name );
+     if ( codec )
+@@ -700,10 +698,6 @@ QTextCodec* KCharsets::codecForName(const QString &n) const
+ 
+ QTextCodec* KCharsets::codecForName(const QString &n, bool &ok) const
+ {
+-    if (n == QLatin1String("gb2312") || n == QLatin1String("gbk")) {
+-        ok = true;
+-        return QTextCodec::codecForName( "gb18030" );
+-    }
+     const QByteArray name( n.toLatin1() );
+     QTextCodec* codec = codecForNameOrNull( name );
+     if ( codec )
+@@ -731,22 +725,30 @@ QTextCodec *KCharsets::codecForNameOrNull( const QByteArray& n ) const
+         d->codecForNameDict.insert("->locale<-", codec);
+         return codec;
+     }
++
++    QByteArray name = n;
++    // Force the newer gb18030 codec for Chinese text
++    // See BUG:98798, BUG:223911, BUG:251264
++    if ( name == "gb2312" || name == "gbk" ) {
++        name = "gb18030";
++    }
++
+     // For a non-empty name, lookup the "dictionnary", in a case-sensitive way.
+-    else if ( d->codecForNameDict.contains( n ) ) {
+-        return d->codecForNameDict.value( n );
++    if ( d->codecForNameDict.contains( name ) ) {
++        return d->codecForNameDict.value( name );
+     }
+ 
+     // If the name is not in the hash table, call directly QTextCoded::codecForName.
+     // We assume that QTextCodec is smarter and more maintained than this code.
+-    codec = QTextCodec::codecForName( n );
++    codec = QTextCodec::codecForName( name );
+     if ( codec ) {
+-        d->codecForNameDict.insert( n, codec );
++        d->codecForNameDict.insert( name, codec );
+         return codec;
+     }
+ 
+     // We have had no luck with QTextCodec::codecForName, so we must now process the name, so that QTextCodec::codecForName could work with it.
+ 
+-    QByteArray name = n.toLower();
++    name = name.toLower();
+     bool changed = false;
+     if (name.endsWith("_charset")) { // krazy:exclude=strings
+        name.chop( 8 );
+-- 
+1.7.4.msysgit.0
+

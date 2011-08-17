@@ -1,4 +1,4 @@
-From 64f7184d898f3cfec1ae9fc2fc2fdf264dbfe5a5 Mon Sep 17 00:00:00 2001
+From 797bca974c9489a2c6541233451d25757b293344 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Thu, 10 Feb 2011 15:01:26 +0700
 Subject: [PATCH] KIMAP::FetchJob: adding the ability to fetch custom headers
@@ -9,7 +9,7 @@ Subject: [PATCH] KIMAP::FetchJob: adding the ability to fetch custom headers
  2 files changed, 19 insertions(+), 1 deletions(-)
 
 diff --git a/kimap/fetchjob.cpp b/kimap/fetchjob.cpp
-index 71b437b..64b0864 100644
+index 5ed0a05..3d13977 100644
 --- a/kimap/fetchjob.cpp
 +++ b/kimap/fetchjob.cpp
 @@ -171,7 +171,13 @@ void FetchJob::doStart()
@@ -51,5 +51,5 @@ index aa31d2d..8bb5944 100644
  
      explicit FetchJob( Session *session );
 -- 
-1.7.6
+1.7.4.msysgit.0
 

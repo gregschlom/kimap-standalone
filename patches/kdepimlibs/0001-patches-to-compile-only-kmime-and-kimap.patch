@@ -1,4 +1,4 @@
-From 24c31d5f87a5a0dd58e0a6f6d75bf97601671762 Mon Sep 17 00:00:00 2001
+From 9477dae647753b5ea1c48d47e453a35eb03870ae Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Thu, 10 Feb 2011 10:34:28 +0700
 Subject: [PATCH] patches to compile only kmime and kimap
@@ -9,7 +9,7 @@ Subject: [PATCH] patches to compile only kmime and kimap
  2 files changed, 23 insertions(+), 5 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 362fc49..790a72f 100644
+index 393c590..5cda72d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -14,9 +14,9 @@ set(KDEPIMLIBS_VERSION ${KDEPIMLIBS_VERSION_MAJOR}.${KDEPIMLIBS_VERSION_MINOR}.$
@@ -22,8 +22,8 @@ index 362fc49..790a72f 100644
 -endif(WINCE)
 +endif(WINCE OR KIMAP_STANDALONE)
  
- set (QT_MIN_VERSION "4.6.0")
- # kdepim depends on the latest released version of KDE 4.4
+ set (QT_MIN_VERSION "4.7.0")
+ # kdepim depends on the latest released version of kdelibs, ie. 4.x kdepim depends on 4.x-1 kdelibs
 @@ -71,23 +71,28 @@ macro_log_feature(Boost_FOUND "Boost C++ Libraries" "Required by core components
  
  
@@ -40,7 +40,7 @@ index 362fc49..790a72f 100644
  if (NOT KDEPIM_ONLY_KLEO)
 +  if (NOT KIMAP_STANDALONE)
    #FindAkonadi.cmake is only there for compatibility reasons, but we don't want to use that.
-   set(Akonadi_MIN_VERSION "1.5.51")
+   set(Akonadi_MIN_VERSION "1.5.52")
    find_package(Akonadi ${Akonadi_MIN_VERSION} QUIET NO_MODULE)
    macro_log_feature(Akonadi_FOUND "Akonadi server libraries" "Access to PIM storage and services" "http://pim.kde.org/akonadi" TRUE "${Akonadi_MIN_VERSION}" "")
 +  endif (NOT KIMAP_STANDALONE)
@@ -62,7 +62,7 @@ index 362fc49..790a72f 100644
  endif (NOT KDEPIM_ONLY_KLEO)
  
  ############### Needed commands before building anything ###############
-@@ -159,6 +164,12 @@ endif(STATIC_LIBRARY)
+@@ -156,6 +161,12 @@ endif(STATIC_LIBRARY)
  ############### Now, we add the KDEPIMLibs components ###############
  # These targets will always be built
  add_subdirectory(cmake)
@@ -75,7 +75,7 @@ index 362fc49..790a72f 100644
  add_subdirectory(gpgme++)
  add_subdirectory(qgpgme)
  
-@@ -203,17 +214,20 @@ endif (NOT KDEPIM_ONLY_KLEO)
+@@ -200,17 +211,20 @@ endif (NOT KDEPIM_ONLY_KLEO)
  # doc must be a subdir of kdepimlibs
  macro_optional_add_subdirectory(doc)
  
@@ -98,7 +98,7 @@ index 362fc49..790a72f 100644
  # now create the KdepimLibsConfig.cmake file, which will be loaded by
  # kdelibs/cmake/modules/FindKdepimLibs.cmake and which has to contain all information
 diff --git a/kmime/tests/auto/CMakeLists.txt b/kmime/tests/auto/CMakeLists.txt
-index f5ae49f..a16fc48 100644
+index af9522b..b114fac 100644
 --- a/kmime/tests/auto/CMakeLists.txt
 +++ b/kmime/tests/auto/CMakeLists.txt
 @@ -6,7 +6,11 @@ macro(add_kmime_test _source)
@@ -115,5 +115,5 @@ index f5ae49f..a16fc48 100644
  
  add_kmime_test(rfc2047test.cpp)
 -- 
-1.7.6
+1.7.4.msysgit.0
 

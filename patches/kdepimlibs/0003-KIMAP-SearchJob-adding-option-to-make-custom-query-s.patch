@@ -1,8 +1,7 @@
-From ce7b44814c97a867dfcd1992263445a4e991434f Mon Sep 17 00:00:00 2001
+From be7641d88193df9c0b33501198b5ce83c53481bb Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Thu, 10 Feb 2011 17:52:18 +0700
-Subject: [PATCH] KIMAP::SearchJob: adding option to make custom-query
- searches
+Subject: [PATCH] KIMAP::SearchJob: adding option to make custom-query searches
 
 Conflicts:
 
@@ -126,5 +125,5 @@ index 077e8d4..b0003ba 100644
       * Get the search result, as a list of sequence numbers or UIDs, based on the isUidBased status
       * @return the found items
 -- 
-1.7.6
+1.7.4.msysgit.0
 

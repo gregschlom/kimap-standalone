@@ -1,0 +1,85 @@
+From 99b84ffaa2efba01e2c6277b192804a80888dd38 Mon Sep 17 00:00:00 2001
+From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
+Date: Wed, 17 Aug 2011 14:28:10 -0700
+Subject: [PATCH] Redirecting all kdebug to qdebug
+
+---
+ kdecore/io/kdebug.h |   36 ++++++++++++++++++------------------
+ 1 files changed, 18 insertions(+), 18 deletions(-)
+
+diff --git a/kdecore/io/kdebug.h b/kdecore/io/kdebug.h
+index 072bcc8..d03e55e 100644
+--- a/kdecore/io/kdebug.h
++++ b/kdecore/io/kdebug.h
+@@ -150,9 +150,9 @@ KDECORE_EXPORT void kClearDebugConfig();
+  * @param area an id to identify the output, KDE_DEFAULT_DEBUG_AREA for default
+  */
+ static inline QDebug kDebug(int area = KDE_DEFAULT_DEBUG_AREA)
+-{ return kDebugStream(QtDebugMsg, area); }
++{ return qDebug(); }
+ static inline QDebug kDebug(bool cond, int area = KDE_DEFAULT_DEBUG_AREA)
+-{ return cond ? kDebug(area) : kDebugDevNull(); }
++{ return cond ? qDebug() : kDebugDevNull(); }
+ 
+ #else  // KDE_NO_DEBUG_OUTPUT
+ static inline QDebug kDebug(int = KDE_DEFAULT_DEBUG_AREA) { return kDebugDevNull(); }
+@@ -167,9 +167,9 @@ static inline QDebug kDebug(bool, int = KDE_DEFAULT_DEBUG_AREA) { return kDebugD
+  * @param area an id to identify the output, KDE_DEFAULT_DEBUG_AREA for default
+  */
+ static inline QDebug kWarning(int area = KDE_DEFAULT_DEBUG_AREA)
+-{ return kDebugStream(QtWarningMsg, area); }
++{ return qWarning(); }
+ static inline QDebug kWarning(bool cond, int area = KDE_DEFAULT_DEBUG_AREA)
+-{ return cond ? kWarning(area) : kDebugDevNull(); }
++{ return cond ? qWarning() : kDebugDevNull(); }
+ 
+ #else  // KDE_NO_WARNING_OUTPUT
+ static inline QDebug kWarning(int = KDE_DEFAULT_DEBUG_AREA) { return kDebugDevNull(); }
+@@ -183,9 +183,9 @@ static inline QDebug kWarning(bool, int = KDE_DEFAULT_DEBUG_AREA) { return kDebu
+  * @param area an id to identify the output, KDE_DEFAULT_DEBUG_AREA for default
+  */
+ static inline QDebug kError(int area = KDE_DEFAULT_DEBUG_AREA)
+-{ return kDebugStream(QtCriticalMsg, area); }
++{ return qWarning(); }
+ static inline QDebug kError(bool cond, int area = KDE_DEFAULT_DEBUG_AREA)
+-{ return cond ? kError(area) : kDebugDevNull(); }
++{ return cond ? qWarning() : kDebugDevNull(); }
+ 
+ /**
+  * \relates KGlobal
+@@ -219,20 +219,20 @@ class QObject;
+ KDECORE_EXPORT QDebug operator<<(QDebug s, const KUrl &url);
+ KDECORE_EXPORT QDebug operator<<(QDebug s, const KDateTime &time);
+ 
+-#if 1 || defined(KDE3_SUPPORT)
+-#ifndef KDE_NO_DEPRECATED
+-class KDE_DEPRECATED kndbgstream { };
+-typedef QDebug kdbgstream;
++//#if 1 || defined(KDE3_SUPPORT)
++//#ifndef KDE_NO_DEPRECATED
++//class KDE_DEPRECATED kndbgstream { };
++//typedef QDebug kdbgstream;
+ 
+-static inline KDE_DEPRECATED QDebug kdDebug(int area = KDE_DEFAULT_DEBUG_AREA) { return kDebug(area); }
+-static inline KDE_DEPRECATED QDebug kdWarning(int area = KDE_DEFAULT_DEBUG_AREA) { return kWarning(area); }
+-static inline KDE_DEPRECATED QDebug kdError(int area = KDE_DEFAULT_DEBUG_AREA) { return kError(area); }
+-static inline KDE_DEPRECATED QDebug kdFatal(int area = KDE_DEFAULT_DEBUG_AREA) { return kFatal(area); }
+-inline KDE_DEPRECATED QString kdBacktrace(int levels=-1) { return kBacktrace( levels ); }
++//static inline KDE_DEPRECATED QDebug kdDebug(int area = KDE_DEFAULT_DEBUG_AREA) { return kDebug(area); }
++//static inline KDE_DEPRECATED QDebug kdWarning(int area = KDE_DEFAULT_DEBUG_AREA) { return kWarning(area); }
++//static inline KDE_DEPRECATED QDebug kdError(int area = KDE_DEFAULT_DEBUG_AREA) { return kError(area); }
++//static inline KDE_DEPRECATED QDebug kdFatal(int area = KDE_DEFAULT_DEBUG_AREA) { return kFatal(area); }
++//inline KDE_DEPRECATED QString kdBacktrace(int levels=-1) { return kBacktrace( levels ); }
+ 
+-static inline KDE_DEPRECATED QDebug kndDebug() { return kDebugDevNull(); }
+-#endif
+-#endif
++//static inline KDE_DEPRECATED QDebug kndDebug() { return kDebugDevNull(); }
++//#endif
++//#endif
+ 
+ class WrongSyntax {};
+ 
+-- 
+1.7.4.msysgit.0
+

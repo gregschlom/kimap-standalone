@@ -1,15 +1,14 @@
-From ba0fa53ec809eaafb3d61f8a63b078a9e27aef70 Mon Sep 17 00:00:00 2001
+From 38d456c851bce574222e086b02d6e89e4a3babc5 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Sat, 26 Mar 2011 11:18:09 +0700
-Subject: [PATCH] Adding CMake and C++ flag NO_DBUS to compile kdecore without
- dbus
+Subject: [PATCH] Adding CMake and C++ flag NO_DBUS to compile kdecore without dbus
 
 ---
- kdecore/CMakeLists.txt                     |   28 ++++++++++++++++++++++----
+ kdecore/CMakeLists.txt                     |   28 +++++++++++++++++++++----
  kdecore/config/kconfig.cpp                 |    6 +++++
  kdecore/date/ksystemtimezone.cpp           |    9 +++++++-
  kdecore/io/kdebugdbusiface.cpp             |    2 +
- kdecore/network/ksslcertificatemanager.cpp |   29 +++++++++++++++++++++++++++-
+ kdecore/network/ksslcertificatemanager.cpp |   30 +++++++++++++++++++++++++++-
  kdecore/network/ksslcertificatemanager_p.h |    4 +++
  kdecore/services/kmimetype.cpp             |    4 +++
  kdecore/sycoca/ksycoca.cpp                 |    9 +++++++-
@@ -17,13 +16,13 @@ Subject: [PATCH] Adding CMake and C++ flag NO_DBUS to compile kdecore without
  kdecore/tests/kdatetimetest.cpp            |    4 +++
  kdecore/tests/klocaletest.cpp              |    4 +++
  kdecore/tests/ktimezonestest.cpp           |    4 +++
- 12 files changed, 102 insertions(+), 10 deletions(-)
+ 12 files changed, 103 insertions(+), 10 deletions(-)
 
 diff --git a/kdecore/CMakeLists.txt b/kdecore/CMakeLists.txt
-index 57945a8..a0a31a4 100644
+index 58328f7..cb72a48 100644
 --- a/kdecore/CMakeLists.txt
 +++ b/kdecore/CMakeLists.txt
-@@ -95,7 +95,6 @@ endif (APPLE)
+@@ -114,7 +114,6 @@ endif (APPLE)
  if (WIN32)
     LIST(APPEND kdecore_OPTIONAL_SRCS
        kernel/kkernel_win.cpp
@@ -31,7 +30,7 @@ index 57945a8..a0a31a4 100644
        kernel/kstandarddirs_win.cpp
        localization/klocale_win.cpp
        network/klocalsocket_win.cpp
-@@ -105,6 +104,11 @@ if (WIN32)
+@@ -124,6 +123,11 @@ if (WIN32)
        util/kshell_win.cpp
        date/ktimezone_win.cpp
     )
@@ -43,7 +42,7 @@ index 57945a8..a0a31a4 100644
     if(NOT WINCE)
         LIST(APPEND kdecore_OPTIONAL_SRCS
            util/kuser_win.cpp
-@@ -124,7 +128,6 @@ endif (WIN32)
+@@ -143,7 +147,6 @@ endif (WIN32)
  
  if (UNIX)
     set(kdecore_OPTIONAL_SRCS ${kdecore_OPTIONAL_SRCS}
@@ -51,7 +50,7 @@ index 57945a8..a0a31a4 100644
        kernel/kstandarddirs_unix.cpp
        localization/klocale_unix.cpp
        network/klocalsocket_unix.cpp
-@@ -135,6 +138,11 @@ if (UNIX)
+@@ -154,6 +157,11 @@ if (UNIX)
        util/kmacroexpander_unix.cpp
        fakes.c
     )
@@ -63,7 +62,7 @@ index 57945a8..a0a31a4 100644
     if (NOT KDECORE_NO_KDE3SUPPORT)
        set(kdecore_OPTIONAL_SRCS ${kdecore_OPTIONAL_SRCS}
           network/k3httpproxysocketdevice.cpp
-@@ -228,7 +236,6 @@ set(kdecore_LIB_SRCS
+@@ -248,7 +256,6 @@ set(kdecore_LIB_SRCS
     kernel/kglobal.cpp
     kernel/kcomponentdata.cpp
     kernel/kstandarddirs.cpp
@@ -71,7 +70,7 @@ index 57945a8..a0a31a4 100644
     auth/kauthaction.cpp
     auth/kauthactionreply.cpp
     auth/kauthactionwatcher.cpp
-@@ -271,6 +278,12 @@ set(kdecore_LIB_SRCS
+@@ -291,6 +298,12 @@ set(kdecore_LIB_SRCS
     sonnet/globals.cpp
  )
  
@@ -84,7 +83,7 @@ index 57945a8..a0a31a4 100644
  if (NOT KDECORE_NO_KDE3SUPPORT)
     set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
        network/k3socketdevice.cpp # must be before the rest of network/, for enable-final
-@@ -346,9 +359,7 @@ set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
+@@ -366,9 +379,7 @@ set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
     text/kstringhandler.cpp
     util/kallocator.cpp
     util/kautostart.cpp
@@ -94,7 +93,7 @@ index 57945a8..a0a31a4 100644
     util/klibrary.cpp
     util/kmacroexpander.cpp
     util/kpluginfactory.cpp
-@@ -360,6 +371,13 @@ set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
+@@ -380,6 +391,13 @@ set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
     ${kdecore_OPTIONAL_SRCS}
  )
  
@@ -109,10 +108,10 @@ index 57945a8..a0a31a4 100644
      set(kdecore_LIB_SRCS ${kdecore_LIB_SRCS}
         util/klibloader.cpp
 diff --git a/kdecore/config/kconfig.cpp b/kdecore/config/kconfig.cpp
-index 35eb7a3..5ee5894 100644
+index fcf0ce9..64afcbf 100644
 --- a/kdecore/config/kconfig.cpp
 +++ b/kdecore/config/kconfig.cpp
-@@ -34,7 +34,11 @@
+@@ -35,7 +35,11 @@
  #include <kstandarddirs.h>
  #include <kurl.h>
  #include <kcomponentdata.h>
@@ -124,7 +123,7 @@ index 35eb7a3..5ee5894 100644
  #include <kaboutdata.h>
  #include <kdebug.h>
  
-@@ -401,6 +405,7 @@ void KConfig::markAsClean()
+@@ -493,6 +497,7 @@ void KConfig::markAsClean()
  
  void KConfig::checkUpdate(const QString &id, const QString &updateFile)
  {
@@ -132,7 +131,7 @@ index 35eb7a3..5ee5894 100644
      const KConfigGroup cg(this, "$Version");
      const QString cfg_id = updateFile+QLatin1Char(':')+id;
      const QStringList ids = cg.readEntry("update_info", QStringList());
-@@ -408,6 +413,7 @@ void KConfig::checkUpdate(const QString &id, const QString &updateFile)
+@@ -500,6 +505,7 @@ void KConfig::checkUpdate(const QString &id, const QString &updateFile)
          KToolInvocation::kdeinitExecWait(QString::fromLatin1("kconf_update"), QStringList() << QString::fromLatin1("--check") << updateFile);
          reparseConfiguration();
      }
@@ -141,10 +140,10 @@ index 35eb7a3..5ee5894 100644
  
  KConfig* KConfig::copyTo(const QString &file, KConfig *config) const
 diff --git a/kdecore/date/ksystemtimezone.cpp b/kdecore/date/ksystemtimezone.cpp
-index 446ce4e..5d0bf34 100644
+index 2b4db2c..b4858e7 100644
 --- a/kdecore/date/ksystemtimezone.cpp
 +++ b/kdecore/date/ksystemtimezone.cpp
-@@ -52,7 +52,11 @@
+@@ -53,7 +53,11 @@
  #include <kcodecs.h>
  #include <kstringhandler.h>
  #include <ktemporaryfile.h>
@@ -156,7 +155,7 @@ index 446ce4e..5d0bf34 100644
  #include <kdebug.h>
  #include <kconfiggroup.h>
  #include "ktzfiletimezone.h"
-@@ -179,12 +183,14 @@ K_GLOBAL_STATIC(KTimeZone, simulatedLocalZone)
+@@ -180,12 +184,14 @@ K_GLOBAL_STATIC(KTimeZone, simulatedLocalZone)
  KSystemTimeZones::KSystemTimeZones()
    : d(0)
  {
@@ -171,7 +170,7 @@ index 446ce4e..5d0bf34 100644
  }
  
  KSystemTimeZones::~KSystemTimeZones()
-@@ -297,6 +303,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
+@@ -298,6 +304,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
          // A KSystemTimeZones instance is required only to catch D-Bus signals.
          m_parent = new KSystemTimeZones;
          // Ensure that the KDED time zones module has initialized. The call loads the module on demand.
@@ -179,7 +178,7 @@ index 446ce4e..5d0bf34 100644
          if (!QDBusConnection::sessionBus().interface()->isServiceRegistered(QLatin1String("org.kde.kded")))
              KToolInvocation::klauncher();   // this calls startKdeinit, and blocks until it returns
          const QString dbusIface = QString::fromLatin1(KTIMEZONED_DBUS_IFACE);
-@@ -307,7 +314,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
+@@ -308,7 +315,7 @@ KSystemTimeZonesPrivate *KSystemTimeZonesPrivate::instance()
              kError(161) << "KSystemTimeZones: ktimezoned initialize() D-Bus call failed: " << reply.error().message() << endl;
  kDebug(161)<<"instance(): ... initialised";
          delete ktimezoned;
@@ -205,10 +204,10 @@ index 6fbab74..4774034 100644
  
  KDebugDBusIface::~KDebugDBusIface()
 diff --git a/kdecore/network/ksslcertificatemanager.cpp b/kdecore/network/ksslcertificatemanager.cpp
-index c4e2766..37c03dc 100644
+index c0ee914..b81a421 100644
 --- a/kdecore/network/ksslcertificatemanager.cpp
 +++ b/kdecore/network/ksslcertificatemanager.cpp
-@@ -28,11 +28,19 @@
+@@ -29,11 +29,20 @@
  #include <kglobal.h>
  #include <klocale.h>
  #include <kstandarddirs.h>
@@ -226,10 +225,11 @@ index c4e2766..37c03dc 100644
  #include "kssld/kssld_interface.h"
 +#endif
 +
- #include "ksslcertificatemanager_p.h"
++#include "ksslcertificatemanager_p.h"
  
  /*
-@@ -206,9 +214,13 @@ static QList<QSslCertificate> deduplicate(const QList<QSslCertificate> &certs)
+   Config file format:
+@@ -206,9 +215,13 @@ static QList<QSslCertificate> deduplicate(const QList<QSslCertificate> &certs)
  
  KSslCertificateManagerPrivate::KSslCertificateManagerPrivate()
   : config(QString::fromLatin1("ksslcertificatemanager"), KConfig::SimpleConfig),
@@ -243,7 +243,7 @@ index c4e2766..37c03dc 100644
     isCertListLoaded(false),
     userCertDir(KGlobal::dirs()->saveLocation("data", QString::fromLatin1("kssl/userCaCertificates/")))
  {
-@@ -449,10 +461,12 @@ K_GLOBAL_STATIC(KSslCertificateManagerContainer, g_instance)
+@@ -449,10 +462,12 @@ K_GLOBAL_STATIC(KSslCertificateManagerContainer, g_instance)
  KSslCertificateManager::KSslCertificateManager()
   : d(new KSslCertificateManagerPrivate())
  {
@@ -256,7 +256,7 @@ index c4e2766..37c03dc 100644
  }
  
  
-@@ -471,26 +485,37 @@ KSslCertificateManager *KSslCertificateManager::self()
+@@ -471,26 +486,37 @@ KSslCertificateManager *KSslCertificateManager::self()
  
  void KSslCertificateManager::setRule(const KSslCertificateRule &rule)
  {
@@ -294,7 +294,7 @@ index c4e2766..37c03dc 100644
  }
  
  
-@@ -530,4 +555,6 @@ void _setAllKsslCaCertificates(KSslCertificateManager *cm, const QList<KSslCaCer
+@@ -530,4 +556,6 @@ void _setAllKsslCaCertificates(KSslCertificateManager *cm, const QList<KSslCaCer
      KSslCertificateManagerPrivate::get(cm)->setAllCertificates(certsIn);
  }
  
@@ -302,12 +302,12 @@ index c4e2766..37c03dc 100644
  #include "kssld/kssld_interface.moc"
 +#endif
 diff --git a/kdecore/network/ksslcertificatemanager_p.h b/kdecore/network/ksslcertificatemanager_p.h
-index cec6b78..318df5a 100644
+index 1a9c9ca..d3be5cf 100644
 --- a/kdecore/network/ksslcertificatemanager_p.h
 +++ b/kdecore/network/ksslcertificatemanager_p.h
-@@ -75,7 +75,11 @@ public:
+@@ -80,7 +80,11 @@ public:
      QList<KSslCaCertificate> allCertificates() const;
-     
+ 
      KConfig config;
 +#ifndef NO_DBUS
      org::kde::KSSLDInterface *iface;
@@ -318,10 +318,10 @@ index cec6b78..318df5a 100644
      QHash<KSslError::Error, QString> sslErrorToString;
  
 diff --git a/kdecore/services/kmimetype.cpp b/kdecore/services/kmimetype.cpp
-index e683c2b..27acef4 100644
+index 955bf62..cc59f22 100644
 --- a/kdecore/services/kmimetype.cpp
 +++ b/kdecore/services/kmimetype.cpp
-@@ -485,6 +485,7 @@ QString KMimeType::iconNameForUrl( const KUrl & _url, mode_t mode )
+@@ -484,6 +484,7 @@ QString KMimeType::iconNameForUrl( const KUrl & _url, mode_t mode )
  
  QString KMimeType::favIconForUrl( const KUrl& url )
  {
@@ -329,7 +329,7 @@ index e683c2b..27acef4 100644
      if (url.isLocalFile()
          || !url.protocol().startsWith(QLatin1String("http"))
          || !KMimeTypeRepository::self()->useFavIcons())
-@@ -495,6 +496,9 @@ QString KMimeType::favIconForUrl( const KUrl& url )
+@@ -494,6 +495,9 @@ QString KMimeType::favIconForUrl( const KUrl& url )
                           QString::fromLatin1("org.kde.FavIcon") );
      QDBusReply<QString> result = kded.call( QString::fromLatin1("iconForUrl"), url.url() );
      return result;              // default is QString()
@@ -386,10 +386,10 @@ index fea67fc..c958438 100644
  }
  
 diff --git a/kdecore/tests/CMakeLists.txt b/kdecore/tests/CMakeLists.txt
-index 0ed5d98..16ef259 100644
+index 1b67c56..0386839 100644
 --- a/kdecore/tests/CMakeLists.txt
 +++ b/kdecore/tests/CMakeLists.txt
-@@ -92,11 +92,16 @@ KDECORE_EXECUTABLE_TESTS(
+@@ -94,11 +94,16 @@ KDECORE_EXECUTABLE_TESTS(
   kdebugtest
   kcmdlineargstest
   kmemtest
@@ -409,7 +409,7 @@ index 0ed5d98..16ef259 100644
  
  # compile into the test since it's not exported
 diff --git a/kdecore/tests/kdatetimetest.cpp b/kdecore/tests/kdatetimetest.cpp
-index 24a0264..a2f49c4 100644
+index f40c9b8..9b5015e 100644
 --- a/kdecore/tests/kdatetimetest.cpp
 +++ b/kdecore/tests/kdatetimetest.cpp
 @@ -1335,6 +1335,7 @@ void KDateTimeTest::toClockTime()
@@ -431,10 +431,10 @@ index 24a0264..a2f49c4 100644
  
  void KDateTimeTest::toTimeSpec()
 diff --git a/kdecore/tests/klocaletest.cpp b/kdecore/tests/klocaletest.cpp
-index fd331ac..73f0ebd 100644
+index ed364ec..f94d6be 100644
 --- a/kdecore/tests/klocaletest.cpp
 +++ b/kdecore/tests/klocaletest.cpp
-@@ -258,9 +258,13 @@ KLocaleTest::formatDateTime()
+@@ -745,9 +745,13 @@ KLocaleTest::formatDateTime()
  	QCOMPARE(locale.formatDateTime(qdt, KLocale::FancyLongDate), qdt.toString(full));
  
  	// The use of KSystemTimeZones requires kded to be running
@@ -449,10 +449,10 @@ index fd331ac..73f0ebd 100644
  	small = "%Y-%m-%d %H:%M";
  	smallsecs = "%Y-%m-%d %H:%M:%S";
 diff --git a/kdecore/tests/ktimezonestest.cpp b/kdecore/tests/ktimezonestest.cpp
-index b08ccde..29a6d19 100644
+index 122f424..5461de8 100644
 --- a/kdecore/tests/ktimezonestest.cpp
 +++ b/kdecore/tests/ktimezonestest.cpp
-@@ -164,6 +164,7 @@ void KTimeZonesTest::zonetabChange()
+@@ -166,6 +166,7 @@ void KTimeZonesTest::zonetabChange()
      QVERIFY(!KSystemTimeZones::zone("Asia/Dili").isValid());
      QVERIFY(KSystemTimeZones::zone("America/Los_Angeles").isValid());
  
@@ -460,7 +460,7 @@ index b08ccde..29a6d19 100644
      // Check that 'london' is automatically updated with the new zone.tab
      // contents, and that the new zones are added to KSystemTimeZones.
      s_testData.writeZoneTab(true);
-@@ -207,6 +208,9 @@ void KTimeZonesTest::zonetabChange()
+@@ -209,6 +210,9 @@ void KTimeZonesTest::zonetabChange()
      QVERIFY(KSystemTimeZones::zone("Africa/Cairo").isValid());
      QVERIFY(!KSystemTimeZones::zone("Asia/Dili").isValid());
      QVERIFY(KSystemTimeZones::zone("America/Los_Angeles").isValid());
@@ -471,5 +471,5 @@ index b08ccde..29a6d19 100644
  
  
 -- 
-1.7.6
+1.7.4.msysgit.0
 
