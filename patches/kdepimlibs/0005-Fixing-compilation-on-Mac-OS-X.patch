@@ -1,4 +1,4 @@
-From 0f74ec943e3859a6ee3a86a346dea70c3df8a9fb Mon Sep 17 00:00:00 2001
+From d7050a89602e8c2ae50053f495b36d6c10ee34c7 Mon Sep 17 00:00:00 2001
 From: Gregory Schlomoff <gregory.schlomoff@gmail.com>
 Date: Sat, 30 Jul 2011 16:50:28 -0700
 Subject: [PATCH] Fixing compilation on Mac OS X
@@ -21,5 +21,5 @@ index 5cda72d..9c1753e 100644
  macro_log_feature(Boost_FOUND "Boost C++ Libraries" "Required by core components" "http://www.boost.org" TRUE ${Boost_MINIMUM_VERSION} "Boost must include the boost-graph library")
  
 -- 
-1.7.4.msysgit.0
+1.7.3.1.msysgit.0
 
